@@ -1,0 +1,71 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\Assets\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Assets\CLUB-1.svg" />
+    <None Include="wwwroot\Assets\CLUB-10.svg" />
+    <None Include="wwwroot\Assets\CLUB-11-JACK.svg" />
+    <None Include="wwwroot\Assets\CLUB-12-QUEEN.svg" />
+    <None Include="wwwroot\Assets\CLUB-13-KING.svg" />
+    <None Include="wwwroot\Assets\CLUB-2.svg" />
+    <None Include="wwwroot\Assets\CLUB-3.svg" />
+    <None Include="wwwroot\Assets\CLUB-4.svg" />
+    <None Include="wwwroot\Assets\CLUB-5.svg" />
+    <None Include="wwwroot\Assets\CLUB-6.svg" />
+    <None Include="wwwroot\Assets\CLUB-7.svg" />
+    <None Include="wwwroot\Assets\CLUB-8.svg" />
+    <None Include="wwwroot\Assets\CLUB-9.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-1.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-10.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-11-JACK.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-12-QUEEN.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-13-KING.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-2.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-3.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-4.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-5.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-6.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-7.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-8.svg" />
+    <None Include="wwwroot\Assets\DIAMOND-9.svg" />
+    <None Include="wwwroot\Assets\HEART-1.svg" />
+    <None Include="wwwroot\Assets\HEART-10.svg" />
+    <None Include="wwwroot\Assets\HEART-11-JACK.svg" />
+    <None Include="wwwroot\Assets\HEART-12-QUEEN.svg" />
+    <None Include="wwwroot\Assets\HEART-13-KING.svg" />
+    <None Include="wwwroot\Assets\HEART-2.svg" />
+    <None Include="wwwroot\Assets\HEART-3.svg" />
+    <None Include="wwwroot\Assets\HEART-4.svg" />
+    <None Include="wwwroot\Assets\HEART-5.svg" />
+    <None Include="wwwroot\Assets\HEART-6.svg" />
+    <None Include="wwwroot\Assets\HEART-7.svg" />
+    <None Include="wwwroot\Assets\HEART-8.svg" />
+    <None Include="wwwroot\Assets\HEART-9.svg" />
+    <None Include="wwwroot\Assets\JOKER-1.svg" />
+    <None Include="wwwroot\Assets\JOKER-2.svg" />
+    <None Include="wwwroot\Assets\JOKER-3.svg" />
+    <None Include="wwwroot\Assets\SPADE-1.svg" />
+    <None Include="wwwroot\Assets\SPADE-10.svg" />
+    <None Include="wwwroot\Assets\SPADE-11-JACK.svg" />
+    <None Include="wwwroot\Assets\SPADE-12-QUEEN.svg" />
+    <None Include="wwwroot\Assets\SPADE-13-KING.svg" />
+    <None Include="wwwroot\Assets\SPADE-2.svg" />
+    <None Include="wwwroot\Assets\SPADE-3.svg" />
+    <None Include="wwwroot\Assets\SPADE-4.svg" />
+    <None Include="wwwroot\Assets\SPADE-5.svg" />
+    <None Include="wwwroot\Assets\SPADE-6.svg" />
+    <None Include="wwwroot\Assets\SPADE-7.svg" />
+    <None Include="wwwroot\Assets\SPADE-8.svg" />
+    <None Include="wwwroot\Assets\SPADE-9.svg" />
+  </ItemGroup>
+
+</Project>

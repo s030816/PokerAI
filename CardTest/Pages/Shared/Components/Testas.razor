@@ -1,0 +1,25 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+
+<h3>Tweets</h3>
+
+<div class="card mb-2">
+    <p class="card-body">
+        @for(var i = 1; i < 6; ++i)
+        {
+            <img @onclick="() => test()" src="Assets/CLUB-@(i).svg" style="background-color:red;  height: 200px;" />
+        }
+    </p>
+</div>
+<div class="card mb-2">
+<p>
+        <img @onclick="() => test()" src="Assets/CLUB-1.svg" style="background-color:red; height: 300px;" />
+    <img src="Assets/CLUB-2.svg" style="background-color:red; height: 300px;" />
+</p>
+</div>
+@code {
+    private string? imageSource = "pirmas test";
+    private void test()
+    {
+        imageSource = $"nzn";
+    }
+}

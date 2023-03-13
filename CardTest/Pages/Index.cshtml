@@ -1,0 +1,10 @@
+﻿@page
+@using CardGame.Pages.Shared.Components
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    @(await Html.RenderComponentAsync<Testas>(RenderMode.Server))
+</div>
