@@ -1,21 +1,48 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
+@using MudBlazor
+@inherits LayoutComponentBase
 
-<h3>Tweets</h3>
+<MudThemeProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
-<div class="card mb-2">
-    <p class="card-body">
-        @for(var i = 1; i < 6; ++i)
-        {
-            <img @onclick="() => test()" src="Assets/CLUB-@(i).svg" style="background-color:red;  height: 200px;" />
-        }
-    </p>
-</div>
-<div class="card mb-2">
-<p>
-        <img @onclick="() => test()" src="Assets/CLUB-1.svg" style="background-color:red; height: 300px;" />
+
+<MudAppBar Color="Color.Primary" Fixed="false">
+    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
+    <MudButton Variant="Variant.Filled" Color="Color.Info">Call</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary">Raise</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Info">Fold</MudButton>
+    <MudSpacer />
+    <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
+</MudAppBar>
+
+
+<MudPaper Class="d-flex justify-center">
+    <MudPaper Class="">
+    @for (var i = 1; i < 6; ++i)
+    {
+        <img @onclick="() => test()" src="Assets/CLUB-@(i).svg" style="background-color:red;  height: 200px;" />
+    }
+</MudPaper>
+</MudPaper>
+<br>
+<MudPaper Class="d-flex justify-center">
+    <MudPaper Class="">
+    <img @onclick="() => test()" src="Assets/CLUB-1.svg" style="background-color:red; height: 300px;" />
     <img src="Assets/CLUB-2.svg" style="background-color:red; height: 300px;" />
-</p>
-</div>
+
+    
+</MudPaper>
+
+</MudPaper>
+
+
+
+
+
+
+
+
 @code {
     private string? imageSource = "pirmas test";
     private void test()

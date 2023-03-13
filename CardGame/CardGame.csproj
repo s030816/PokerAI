@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\Assets\" />
+    <Folder Include="wwwroot\css\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -66,6 +67,10 @@
     <None Include="wwwroot\Assets\SPADE-7.svg" />
     <None Include="wwwroot\Assets\SPADE-8.svg" />
     <None Include="wwwroot\Assets\SPADE-9.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="6.1.9" />
   </ItemGroup>
 
 </Project>
