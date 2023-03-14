@@ -15,7 +15,9 @@
     <MudButton Variant="Variant.Filled" Color="Color.Info">Fold</MudButton>
     <p>Balance: @balance</p>
     <p>@(((Game_State)state).ToString())</p>
+    <p>Oponent: @op_balance</p>
     <MudSpacer />
+    
     <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
 </MudAppBar>
 
@@ -58,6 +60,7 @@
         RIVER
     }
     private int? balance = 150;
+    private int? op_balance = 150;
     private int? state = 0;
     private string? imageSource = "pirmas test";
     private string? displayDeck = "display:none;";
