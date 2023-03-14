@@ -8,10 +8,13 @@
 
 
 <MudAppBar Color="Color.Primary" Fixed="false">
+
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
     <MudButton Variant="Variant.Filled" Color="Color.Info">Call</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Secondary">Raise</MudButton>
     <MudButton Variant="Variant.Filled" Color="Color.Info">Fold</MudButton>
+    <p>Balance: @balance</p>
+    <p>@(((Game_State)state).ToString())</p>
     <MudSpacer />
     <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
 </MudAppBar>
@@ -21,7 +24,10 @@
     <MudPaper Class="">
     @for (var i = 1; i < 6; ++i)
     {
-        <img @onclick="() => test()" src="Assets/CLUB-@(i).svg" style="background-color:red;  height: 200px;" />
+            if (state == (int)Game_State.PREFLOP) break;
+            if (state == (int)Game_State.FLOP && i == 4) break;
+            if (state == (int)Game_State.TURN && i == 5) break;
+            <img src="Assets/CLUB-@(i).svg" style="background-color:red;  height: 200px; @(displayDeck)" />
     }
 </MudPaper>
 </MudPaper>
@@ -44,9 +50,21 @@
 
 
 @code {
+    private enum Game_State
+    {
+        PREFLOP,
+        FLOP,
+        TURN,
+        RIVER
+    }
+    private int? balance = 150;
+    private int? state = 0;
     private string? imageSource = "pirmas test";
+    private string? displayDeck = "display:none;";
     private void test()
     {
-        imageSource = $"nzn";
+        
+        state = (state + 1) % 4;
+        displayDeck = "";
     }
 }
