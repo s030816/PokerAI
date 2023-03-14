@@ -51,9 +51,6 @@
     <None Include="wwwroot\Assets\HEART-7.svg" />
     <None Include="wwwroot\Assets\HEART-8.svg" />
     <None Include="wwwroot\Assets\HEART-9.svg" />
-    <None Include="wwwroot\Assets\JOKER-1.svg" />
-    <None Include="wwwroot\Assets\JOKER-2.svg" />
-    <None Include="wwwroot\Assets\JOKER-3.svg" />
     <None Include="wwwroot\Assets\SPADE-1.svg" />
     <None Include="wwwroot\Assets\SPADE-10.svg" />
     <None Include="wwwroot\Assets\SPADE-11-JACK.svg" />

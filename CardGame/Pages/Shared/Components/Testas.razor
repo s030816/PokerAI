@@ -1,5 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
 @using MudBlazor
+@using System.Text.Json;
+@using CardGame.Pages.Shared.Components;
 @inherits LayoutComponentBase
 
 <MudThemeProvider/>
@@ -10,7 +12,7 @@
 <MudAppBar Color="Color.Primary" Fixed="false">
 
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
-    <MudButton Variant="Variant.Filled" Color="Color.Info">Call</MudButton>
+    <MudButton @onclick="() => OnGetProcessRequestAsync()" Variant="Variant.Filled" Color="Color.Info">Call</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Secondary">Raise</MudButton>
     <MudButton Variant="Variant.Filled" Color="Color.Info">Fold</MudButton>
     <p>Balance: @balance</p>
@@ -29,20 +31,22 @@
             if (state == (int)Game_State.PREFLOP) break;
             if (state == (int)Game_State.FLOP && i == 4) break;
             if (state == (int)Game_State.TURN && i == 5) break;
-            <img src="Assets/CLUB-@(i).svg" style="background-color:red;  height: 200px; @(displayDeck)" />
+            <img src="Assets/0-@(i).svg" style="background-color:red;  height: 200px; @(displayDeck)" />
     }
 </MudPaper>
 </MudPaper>
 <br>
 <MudPaper Class="d-flex justify-center">
     <MudPaper Class="">
-    <img @onclick="() => test()" src="Assets/CLUB-1.svg" style="background-color:red; height: 300px;" />
-    <img src="Assets/CLUB-2.svg" style="background-color:red; height: 300px;" />
+    <img @onclick="() => test()" src="Assets/0-1.svg" style="background-color:red; height: 300px;" />
+    <img src="Assets/0-2.svg" style="background-color:red; height: 300px;" />
 
     
 </MudPaper>
 
 </MudPaper>
+
+<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@message</MudAlert>
 
 
 
@@ -64,10 +68,34 @@
     private int? state = 0;
     private string? imageSource = "pirmas test";
     private string? displayDeck = "display:none;";
+    private static HttpClient HTTPClient = new HttpClient();
+    private string? message = "testas";
+
     private void test()
     {
-        
+
         state = (state + 1) % 4;
         displayDeck = "";
+    }
+
+    public async void OnGetProcessRequestAsync()
+    {
+        string request_url = "http://localhost:3000/game_state";
+
+
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+
+        try
+        {
+            HttpResponseMessage responseMessage = await HTTPClient.GetAsync(request_url);
+            message = await responseMessage.Content.ReadAsStringAsync();
+            var gs =
+                JsonSerializer.Deserialize<List<GameState>>(message);
+            message = gs.First().state;
+        }
+        catch (HttpRequestException exception)
+        {
+            message = exception.Message;
+        }
     }
 }
