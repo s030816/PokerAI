@@ -12,12 +12,12 @@
 <MudAppBar Color="Color.Primary" Fixed="false">
 
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
-    <MudButton @onclick="() => OnGetProcessRequestAsync()" Variant="Variant.Filled" Color="Color.Info">Call</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Info">Call</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Secondary">Raise</MudButton>
     <MudButton Variant="Variant.Filled" Color="Color.Info">Fold</MudButton>
-    <p>Balance: @gsc.game_state.player_bank</p>
+    <p>Balance: @gsc.game_state.player_bank.ToString()</p>
     <p>@(((Game_State)gsc.game_state.state).ToString())</p>
-    <p>Oponent: @gsc.game_state.opponent_bank</p>
+    <p>Oponent: @gsc.game_state.opponent_bank.ToString()</p>
     <MudSpacer />
     
     <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
@@ -43,7 +43,7 @@
 
 </MudPaper>
 
-<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.message</MudAlert>
+<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">nieko</MudAlert>
 
 
 
@@ -67,12 +67,12 @@
     private string? displayDeck = "display:none;";
     private GameStateController gsc = new GameStateController();
     private string? message = "testas";
-    
-
+    // @onclick="() => testas()"
+    // <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.message</MudAlert>
     private void test()
     {
 
-        state = (state + 1) % 4;
+        //state = (state + 1) % 4;
         displayDeck = "";
     }
 }

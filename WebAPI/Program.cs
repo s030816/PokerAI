@@ -56,7 +56,21 @@ if (app.Environment.IsDevelopment())
 // Get all collections
 
 
-app.MapGet("/gamestate", () => new { Message = "Hello World" , notMessage = "Goodbye"});
+app.MapGet("/initgame", async (GameStateService game_service) =>
+{
+    string id = "641179ed93393afe53ea26d8";
+    var game_state = await game_service.Get(id);
+
+    if (game_state is null)
+        return Results.NotFound();
+
+    var temp = new Game();
+    var tmp = temp.new_game();
+    tmp._id = id;
+    await game_service.Update(id, tmp);
+
+    return Results.NoContent();
+});
 
 //=============================
 

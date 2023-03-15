@@ -14,6 +14,7 @@ namespace CardGame.Pages.Shared.Components
         public GameStateController()
         {
             //this.OnGetProcessRequestAsync();
+            this.init_process();
             this.OnGetProcessRequest();
         }
         public async void OnGetProcessRequestAsync()
@@ -47,6 +48,15 @@ namespace CardGame.Pages.Shared.Components
             message = reader.ReadToEnd();
             game_state = JsonSerializer.Deserialize<List<GameState>>(message).First();
             
+        }
+        public void init_process()
+        {
+            string request_url = "http://localhost:3000/initgame";
+
+
+            var webRequest = new HttpRequestMessage(HttpMethod.Get, request_url);
+
+            var response = HTTPClient.Send(webRequest);
         }
     }
 }
