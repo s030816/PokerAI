@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Components.Web
+﻿
 @using MudBlazor
 @using System.Text.Json;
 @using CardGame.Pages.Shared.Components;
@@ -15,9 +15,9 @@
     <MudButton @onclick="() => OnGetProcessRequestAsync()" Variant="Variant.Filled" Color="Color.Info">Call</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Secondary">Raise</MudButton>
     <MudButton Variant="Variant.Filled" Color="Color.Info">Fold</MudButton>
-    <p>Balance: @balance</p>
-    <p>@(((Game_State)state).ToString())</p>
-    <p>Oponent: @op_balance</p>
+    <p>Balance: @gsc.game_state.player_bank</p>
+    <p>@(((Game_State)gsc.game_state.state).ToString())</p>
+    <p>Oponent: @gsc.game_state.opponent_bank</p>
     <MudSpacer />
     
     <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
@@ -26,27 +26,24 @@
 
 <MudPaper Class="d-flex justify-center">
     <MudPaper Class="">
-    @for (var i = 1; i < 6; ++i)
+        @for (var i = 0; i < gsc.game_state.state; ++i)
     {
-            if (state == (int)Game_State.PREFLOP) break;
-            if (state == (int)Game_State.FLOP && i == 4) break;
-            if (state == (int)Game_State.TURN && i == 5) break;
-            <img src="Assets/0-@(i).svg" style="background-color:red;  height: 200px; @(displayDeck)" />
+            <img src="Assets/@(gsc.game_state.deck[i]).svg" style="background-color:red;  height: 200px;" />
     }
 </MudPaper>
 </MudPaper>
 <br>
 <MudPaper Class="d-flex justify-center">
     <MudPaper Class="">
-    <img @onclick="() => test()" src="Assets/0-1.svg" style="background-color:red; height: 300px;" />
-    <img src="Assets/0-2.svg" style="background-color:red; height: 300px;" />
+        <img src="Assets/@(gsc.game_state.player_hand[0]).svg" style="background-color:red; height: 300px;" />
+        <img src="Assets/@(gsc.game_state.player_hand[1]).svg" style="background-color:red; height: 300px;" />
 
     
 </MudPaper>
 
 </MudPaper>
 
-<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@message</MudAlert>
+<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.message</MudAlert>
 
 
 
@@ -58,44 +55,24 @@
 @code {
     private enum Game_State
     {
-        PREFLOP,
-        FLOP,
-        TURN,
-        RIVER
+        PREFLOP = 0,
+        FLOP = 3,
+        TURN = 4,
+        RIVER = 5
     }
-    private int? balance = 150;
-    private int? op_balance = 150;
+    private int? balance = 0;
+    private int? op_balance = 0;
     private int? state = 0;
-    private string? imageSource = "pirmas test";
+    //private string? imageSource = "pirmas test";
     private string? displayDeck = "display:none;";
-    private static HttpClient HTTPClient = new HttpClient();
+    private GameStateController gsc = new GameStateController();
     private string? message = "testas";
+    
 
     private void test()
     {
 
         state = (state + 1) % 4;
         displayDeck = "";
-    }
-
-    public async void OnGetProcessRequestAsync()
-    {
-        string request_url = "http://localhost:3000/game_state";
-
-
-        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-
-        try
-        {
-            HttpResponseMessage responseMessage = await HTTPClient.GetAsync(request_url);
-            message = await responseMessage.Content.ReadAsStringAsync();
-            var gs =
-                JsonSerializer.Deserialize<List<GameState>>(message);
-            message = gs.First().state;
-        }
-        catch (HttpRequestException exception)
-        {
-            message = exception.Message;
-        }
     }
 }

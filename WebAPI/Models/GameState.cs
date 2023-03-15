@@ -10,7 +10,7 @@ namespace WebAPI.Models
         public string? _id { get; set; }
 
         [BsonElement("state")]
-        public string? state { get; set; }
+        public int? state { get; set; }
 
         [BsonElement("deck")]
         public List<string>? deck { get; set; }

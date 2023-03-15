@@ -4,7 +4,7 @@ namespace CardGame.Pages.Shared.Components
     public record GameState
     {
         public string? _id { get; set; }
-        public string? state { get; set; }
+        public int? state { get; set; }
         public List<string>? deck { get; set; }
         public List<string>? player_hand { get; set; }
         public List<string>? opponent_hand { get; set; }
