@@ -1,4 +1,5 @@
-﻿using WebAPI.Models;
+﻿using Amazon.Auth.AccessControlPolicy;
+using WebAPI.Models;
 
 namespace WebAPI
 {
@@ -36,12 +37,15 @@ namespace WebAPI
         {
             var state = new GameState();
             state.state = 5;
-            var deck = this.get_random_cards(7);
+            var deck = this.get_random_cards(9);
             state.player_hand = new List<string>();
+            state.opponent_hand = new List<string>();
             state.deck = new List<string>();
             state.player_hand.Add(deck[0]);
             state.player_hand.Add(deck[1]);
-            for(var i = 2; i < 7; ++i)
+            state.opponent_hand.Add(deck[2]);
+            state.opponent_hand.Add(deck[3]);
+            for (var i = 4; i < 9; ++i)
             {
                 state.deck.Add(deck[i]);
             }
@@ -49,5 +53,73 @@ namespace WebAPI
             state.player_bank = 150;
             return state;
         }
+
+        public GameState advance_ingame(GameState current)
+        {
+            switch(current.state)
+            {
+                case 0: 
+                    current.state = 3;
+                    break;
+                case 3:
+                    current.state = 4;
+                    break;
+                case 4:
+                    current.state = 5;
+                    break;
+                case 5:
+                    current.state = 0;
+                    break;
+                default:
+                    return null;
+            }
+            return current;
+        }
+
+        private Tuple<List<Tuple<int,int>>, List<Tuple<int, int>>> extract_card(List<string> deck, List<string> phand, List<string> ohand)
+        {
+            var extracted_deck = new List<Tuple<int,int>>();
+            Action<List<string>, List<Tuple<int, int>>> extract = (deckx,ext) => 
+            {
+                foreach (var card in deckx)
+                {
+                    var parts = card.Split('-');
+                    if (parts[1] == "1") parts[1] = "14";
+                    ext.Add(new Tuple<int, int>(Convert.ToInt32(parts[0]), Convert.ToInt32(parts[1])));
+                }
+            };
+
+            extract(deck,extracted_deck);
+            var dec_cpy = extracted_deck;
+            extract(phand,dec_cpy);
+            extract(ohand,extracted_deck);
+
+
+            dec_cpy.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
+            {
+                if (x.Item2 == y.Item2) return 0;
+                else if (x.Item2 < y.Item2) return -1;
+                else return 1;
+            });
+            extracted_deck.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
+            {
+                if (x.Item2 == y.Item2) return 0;
+                else if (x.Item2 < y.Item2) return -1;
+                else return 1;
+            });
+
+
+            return new Tuple<List<Tuple<int, int>>, List<Tuple<int, int>>>(dec_cpy,extracted_deck);
+        }
+
+        public int check_winner(GameState current)
+        {
+            var decs = this.extract_card(current.deck, current.player_hand, current.opponent_hand);
+            if (current.state != 5) return -1;
+
+            // Royal Flush
+
+        }
+
     }
 }
