@@ -1,5 +1,4 @@
-﻿using Amazon.Auth.AccessControlPolicy;
-using WebAPI.Models;
+﻿using WebAPI.Models;
 
 namespace WebAPI
 {
@@ -75,6 +74,39 @@ namespace WebAPI
             }
             return current;
         }
+        // A K K Q J 10 2
+        // A K Q J 10 2
+        private bool is_straight(List<Tuple<int, int>> deck)
+        {
+            var tmp_deck = new List<int>();
+            for(var i = 0; i < 7; ++i) 
+            {
+                tmp_deck.Add(deck[i].Item2);
+            }
+            tmp_deck = tmp_deck.Distinct().ToList();
+            if (tmp_deck.Count < 5) return false;
+            tmp_deck.Sort();
+          // remake to Highest straigth
+            for (var j = 0; j < tmp_deck.Count - 4; ++j)
+            {
+                if (tmp_deck[j] == tmp_deck[j + 4] - 4) return true;
+            }
+            // Implement special case "the wheel"
+            return false;
+        }
+        private bool is_flush(List<Tuple<int, int>> deck)
+        {
+            int[] tmp_deck = new int[4];
+            for (var i = 0; i < 7; ++i)
+            {
+                ++tmp_deck[deck[i].Item1];
+            }
+            foreach(var i in tmp_deck)
+            {
+                if (i >= 5) return true;
+            }
+            return false;
+        }
 
         private Tuple<List<Tuple<int,int>>, List<Tuple<int, int>>> extract_card(List<string> deck, List<string> phand, List<string> ohand)
         {
@@ -90,7 +122,7 @@ namespace WebAPI
             };
 
             extract(deck,extracted_deck);
-            var dec_cpy = extracted_deck;
+            var dec_cpy = new List<Tuple<int, int>>(extracted_deck);
             extract(phand,dec_cpy);
             extract(ohand,extracted_deck);
 
@@ -98,14 +130,14 @@ namespace WebAPI
             dec_cpy.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
             {
                 if (x.Item2 == y.Item2) return 0;
-                else if (x.Item2 < y.Item2) return -1;
-                else return 1;
+                else if (x.Item2 < y.Item2) return 1;
+                else return -1;
             });
             extracted_deck.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
             {
                 if (x.Item2 == y.Item2) return 0;
-                else if (x.Item2 < y.Item2) return -1;
-                else return 1;
+                else if (x.Item2 < y.Item2) return 1;
+                else return -1;
             });
 
 
@@ -117,8 +149,49 @@ namespace WebAPI
             var decs = this.extract_card(current.deck, current.player_hand, current.opponent_hand);
             if (current.state != 5) return -1;
 
-            // Royal Flush
+            foreach (var i in decs.Item1)
+            {
+                System.Diagnostics.Debug.Write(String.Format("{0}-{1};",i.Item1.ToString(), i.Item2.ToString()));
+            }
 
+            System.Diagnostics.Debug.WriteLine("");
+            foreach (var i in decs.Item2)
+            {
+                System.Diagnostics.Debug.Write(String.Format("{0}-{1};", i.Item1.ToString(), i.Item2.ToString()));
+            }
+            System.Diagnostics.Debug.WriteLine("");
+            bool playerWin = false;
+            bool opponentWin = false;
+            // Royal Flush
+            // Straight flush
+            // Four of a kind
+            // Full house
+            // Flush
+            playerWin = is_flush(decs.Item1);
+            opponentWin = is_flush(decs.Item2);
+            if (playerWin && !opponentWin) return 1;
+            else if (!playerWin && opponentWin) return 2;
+            else if (playerWin && opponentWin) return 3;
+            // Straight
+            /*
+            playerWin = is_straight(decs.Item1);
+            opponentWin = is_straight(decs.Item2);
+            if (playerWin && !opponentWin) return 1;
+            else if(!playerWin && opponentWin) return 2;
+            */
+            // Three of a kind
+            // Two Pair
+            // Pair
+
+            // High card
+            /*
+            for (var i = 0; i < 5; ++i)
+            {
+                if (decs.Item1[i].Item2 > decs.Item2[i].Item2) return 1;
+                else if (decs.Item1[i].Item2 < decs.Item2[i].Item2) return 2;
+            }
+            */
+            return 0;
         }
 
     }

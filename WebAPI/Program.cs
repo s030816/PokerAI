@@ -11,7 +11,7 @@ using System.Text;
 using WebAPI;
 using WebAPI.Models;
 
-
+/*
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,25 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//string DefaultConnectionString = builder.Configuration.GetConnectionString("CardGameDatabase");
 
-
-//builder.Services.AddSingleton<MongoClient>(_ => new MongoClient("mongodb://localhost:27017"));
-
-
-
-/*
-builder.Services.AddSingleton<IMongoDatabase>(
-    provider => provider.GetRequiredService<MongoClient>().GetDatabase("CardGames"));
-builder.Services.AddSingleton<IMongoCollection<GameState>>(
-    provider => provider.GetRequiredService<IMongoDatabase>().GetCollection<GameState>("game_state"));
-*/
-/*
-builder.Services.Configure<JsonOptions>(options =>
-{
-    options.SerializerOptions.Converters.Add(new ObjectIdJsonConverter());
-});
-*/
 builder.Services.AddScoped<GameStateService>();
 
 var app = builder.Build();
@@ -58,7 +40,8 @@ if (app.Environment.IsDevelopment())
 
 app.MapGet("/initgame", async (GameStateService game_service) =>
 {
-    string id = "641179ed93393afe53ea26d8";
+    //string id = "641179ed93393afe53ea26d8";
+    string id = "6410dc0ebb023e49d13004c4";
     var game_state = await game_service.Get(id);
 
     if (game_state is null)
@@ -67,6 +50,8 @@ app.MapGet("/initgame", async (GameStateService game_service) =>
     var temp = new Game();
     var tmp = temp.new_game();
     tmp._id = id;
+
+
     await game_service.Update(id, tmp);
 
     return Results.NoContent();
@@ -117,9 +102,20 @@ app.MapDelete("/game_states/{id}", async (GameStateService game_service, string 
 app.MapGet("/companies", () => "asdas");
 
 app.MapGet("/", () => "Hello World!");
-System.Diagnostics.Debug.WriteLine("testas");
 
-app.Run("http://localhost:3000");
+*/
+
+int winner = 0;
+do
+{
+
+    var temp = new Game();
+    var tmp = temp.new_game();
+    winner = temp.check_winner(tmp);
+    System.Diagnostics.Debug.WriteLine(winner.ToString());
+} while (winner == 0);
+
+//app.Run("http://localhost:3000");
 
 
 
