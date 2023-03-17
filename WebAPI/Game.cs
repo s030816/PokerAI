@@ -160,18 +160,33 @@ namespace WebAPI
                 System.Diagnostics.Debug.Write(String.Format("{0}-{1};", i.Item1.ToString(), i.Item2.ToString()));
             }
             System.Diagnostics.Debug.WriteLine("");
-            bool playerWin = false;
-            bool opponentWin = false;
+            int flush_flag = 0;
+            
+            if(is_flush(decs.Item1))
+            {
+                flush_flag |= 0x1;
+            }
+            if(is_flush(decs.Item2))
+            {
+                flush_flag |= 0x2;
+            }
+
+
+
             // Royal Flush
+            if (flush_flag != 0)
+            {
+
+            }
             // Straight flush
             // Four of a kind
             // Full house
             // Flush
-            playerWin = is_flush(decs.Item1);
-            opponentWin = is_flush(decs.Item2);
-            if (playerWin && !opponentWin) return 1;
-            else if (!playerWin && opponentWin) return 2;
-            else if (playerWin && opponentWin) return 3;
+            if (flush_flag != 0)
+            {
+                return flush_flag;
+            }
+
             // Straight
             /*
             playerWin = is_straight(decs.Item1);
