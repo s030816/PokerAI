@@ -58,5 +58,18 @@ namespace CardGame.Pages.Shared.Components
 
             var response = HTTPClient.Send(webRequest);
         }
+
+        public void OnPutProcess()
+        {
+            string request_url = "http://localhost:3000/game_state";
+
+
+            var webRequest = new HttpRequestMessage(HttpMethod.Put, request_url)
+            {
+
+            };
+
+            var response = HTTPClient.Send(webRequest);
+        }
     }
 }

@@ -33,5 +33,11 @@ namespace WebAPI.Models
         [BsonElement("player_bet")]
         public int player_bet { get; set; }
 
+        [BsonElement("winning_hand")]
+        public string? winning_hand { get; set; }
+
+        [BsonElement("who_won")]
+        public int who_won { get; set; }
+
     }
 }

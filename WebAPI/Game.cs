@@ -7,6 +7,7 @@ namespace WebAPI
     public class Game
     {
         public List<string> cards_ = new List<string>();
+        public string winning_combination = "High Card";
 
         private ulong flush_ =              0b000000001;
         private ulong straight_ =           0b000000010;
@@ -17,6 +18,9 @@ namespace WebAPI
         private ulong full_house_ =         0b001000000;
         private ulong straight_flush_ =     0b010000000;
         private ulong royal_flush_ =        0b100000000;
+
+        private Tuple<int,int> high_card_;
+
 
         public Game() 
         {
@@ -48,7 +52,6 @@ namespace WebAPI
         public GameState new_game()
         {
             var state = new GameState();
-            state.state = 5;
             var deck = this.get_random_cards(9);
             state.player_hand = new List<string>();
             state.opponent_hand = new List<string>();
@@ -90,9 +93,8 @@ namespace WebAPI
 
 
 
-        // A K K Q J 10 2
-        // A K Q J 10 2
-        private void mark_hands(List<Tuple<int, int>> deck, ref ulong flags, ref List<Tuple<int,int>> count_deck)
+        private void mark_hands(List<Tuple<int, int>> deck, ref ulong flags, 
+            ref List<Tuple<int,int>> count_deck)
         {
             var tmp_deck = new List<int>();
             for(var i = 0; i < 7; ++i) 
@@ -124,21 +126,52 @@ namespace WebAPI
             tmp_deck = tmp_deck.Distinct().ToList();
             if (tmp_deck.Count < 5) return;
             tmp_deck.Sort((a, b) => b.CompareTo(a));
-            int high_card = 0;
-            this.is_flush(ref deck, ref flags, ref high_card);
 
-            // Implement special case "the wheel"
-            // Straight flush logic is broken. Check if all cards are of the same type
+            var flush_hand = this.is_flush(ref deck, ref flags);
+
+
             for (var j = 0; j < tmp_deck.Count - 4; ++j)
             {
                 if (tmp_deck[j] == tmp_deck[j + 4] + 4) 
                 {
-                    if (tmp_deck[j] == high_card)
+                    if(flush_hand != null)
                     {
-                        flags |= straight_flush_;
-                        if(high_card == 14) flags |= royal_flush_;
+                        var i = 0;
+                        for (; i < 5; ++i)
+                        {
+                            if (tmp_deck[j + i] != flush_hand[i].Item2)
+                            {
+                                i = -1;
+                                break;
+                            }
+                        }
+                        if(i != -1)
+                        {
+                            flags |= straight_flush_;
+                            if (flush_hand[0].Item2 == 14) 
+                                flags |= royal_flush_;
+                        }
                     }
-                    
+
+                    flags |= straight_;
+                    return;
+                }
+                else if (tmp_deck[j+1] == tmp_deck[j + 4] + 3 && tmp_deck[0] == 14 && 
+                    tmp_deck[j + 4] == 2)
+                {
+                    if (flush_hand != null)
+                    {
+                        var i = 0;
+                        for (; i < 4; ++i)
+                        {
+                            if (tmp_deck[j+1 + i] != flush_hand[1+i].Item2)
+                            {
+                                i = -1;
+                                break;
+                            }
+                        }
+                        if (i != -1) flags |= straight_flush_;
+                    }
                     flags |= straight_;
                     return;
                 }
@@ -146,7 +179,7 @@ namespace WebAPI
             
 
         }
-        private void is_flush(ref List<Tuple<int, int>> deck, ref ulong flags, ref int high_card)
+        private List<Tuple<int, int>> is_flush(ref List<Tuple<int, int>> deck, ref ulong flags)
         {
             int[] tmp_deck = new int[4];
 
@@ -158,14 +191,22 @@ namespace WebAPI
             {
                 if (tmp_deck[i] >= 5)
                 {
+                    List<Tuple<int, int>> flush_hand = new List<Tuple<int, int>>();
                     foreach(var j in deck)
                     {
-                        if(j.Item1 == i && j.Item2 > high_card) high_card = j.Item2;
+                        if(j.Item1 == i) flush_hand.Add(j);
                     }
+                    flush_hand.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
+                    {
+                        if (x.Item2 == y.Item2) return 0;
+                        else if (x.Item2 < y.Item2) return 1;
+                        else return -1;
+                    });
                     flags |= flush_;
-                    return;
+                    return flush_hand;
                 } 
             }
+            return null;
         }
 
         private Tuple<List<Tuple<int,int>>, List<Tuple<int, int>>> extract_card(List<string> deck, List<string> phand, List<string> ohand)
@@ -186,30 +227,12 @@ namespace WebAPI
             extract(phand,dec_cpy);
             extract(ohand,extracted_deck);
 
-            /*
-            dec_cpy.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
-            {
-                if (x.Item2 == y.Item2) return 0;
-                else if (x.Item2 < y.Item2) return 1;
-                else return -1;
-            });
-            extracted_deck.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
-            {
-                if (x.Item2 == y.Item2) return 0;
-                else if (x.Item2 < y.Item2) return 1;
-                else return -1;
-            });
-            */
-
             return new Tuple<List<Tuple<int, int>>, List<Tuple<int, int>>>(dec_cpy,extracted_deck);
         }
 
         /**
          * TODO:
-         * Implement winning hand export
          * Implement high card counter
-         * Implement The wheel straingt
-         * Straight flush logic is broken. 
          */
 
         public int check_winner(GameState current)
@@ -239,55 +262,172 @@ namespace WebAPI
 
             Debug.WriteLine(Convert.ToString((long)pl_flags, 2));
             Debug.WriteLine(Convert.ToString((long)op_flags, 2));
-            var tmp_pl = new List<string>();
-            var tmp_op = new List<string>();
+
 
 
             // Royal Flush
-            if ((pl_flags & royal_flush_) == royal_flush_) tmp_pl.Add("Royal Flush");
-            if ((op_flags & royal_flush_) == royal_flush_) tmp_op.Add("Royal Flush");
+            if ((pl_flags & royal_flush_) == royal_flush_)
+            {
+                this.winning_combination = "Royal Flush";
+                if ((op_flags & royal_flush_) == royal_flush_) return 0;
+                return 1;
+            }
+            else if ((op_flags & royal_flush_) == royal_flush_) 
+            {
+                this.winning_combination = "Royal Flush";
+                return 2;
+            }
             // Straight flush
-            if ((pl_flags & straight_flush_) == straight_flush_) tmp_pl.Add("Straight flush");
-            if ((op_flags & straight_flush_) == straight_flush_) tmp_op.Add("Straight flush");
+            // In the event of a tie: Highest rank at the top of the sequence wins.
+            if ((pl_flags & straight_flush_) == straight_flush_) 
+            {
+                this.winning_combination = "Straight flush";
+                if ((op_flags & straight_flush_) == straight_flush_) return 0;
+                return 1;
+            }
+            else if ((op_flags & straight_flush_) == straight_flush_) 
+            { 
+                this.winning_combination = "Straight flush";
+                return 2;
+            }
             // Four of a kind
-            if ((pl_flags & four_of_a_kind_) == four_of_a_kind_) tmp_pl.Add("Four of a kind");
-            if ((op_flags & four_of_a_kind_) == four_of_a_kind_) tmp_op.Add("Four of a kind");
-            // Full house
-            if ((pl_flags & full_house_) == full_house_) tmp_pl.Add("Full house");
-            if ((op_flags & full_house_) == full_house_) tmp_op.Add("Full house");
-            // Flush
-            if ((pl_flags & flush_) == flush_) tmp_pl.Add("Flush");
-            if ((op_flags & flush_) == flush_) tmp_op.Add("Flush");
-            // Straight
-            if ((pl_flags & straight_) == straight_) tmp_pl.Add("Straight");
-            if ((op_flags & straight_) == straight_) tmp_op.Add("Straight");
-            // Three of a kind
-            if ((pl_flags & three_of_a_kind_) == three_of_a_kind_) tmp_pl.Add("Three of a kind");
-            if ((op_flags & three_of_a_kind_) == three_of_a_kind_) tmp_op.Add("Three of a kind");
-            // Two Pair
-            if ((pl_flags & two_pairs_) == two_pairs_) tmp_pl.Add("Two Pair");
-            if ((op_flags & two_pairs_) == two_pairs_) tmp_op.Add("Two Pair");
-            // Pair
-            if ((pl_flags & one_pair_) == one_pair_) tmp_pl.Add("One Pair");
-            if ((op_flags & one_pair_) == one_pair_) tmp_op.Add("One Pair");
-            // High card
+            // In the event of a tie: Highest four of a kind wins
             /*
+             In community card games where players have the same four of a kind, 
+            the highest fifth side card ('kicker') wins.
+             */
+            if ((pl_flags & four_of_a_kind_) == four_of_a_kind_)
+            {
+                this.winning_combination = "Four of a kind";
+                if ((op_flags & four_of_a_kind_) == four_of_a_kind_) return 0;
+                return 1;
+            }
+            else if ((op_flags & four_of_a_kind_) == four_of_a_kind_)
+            { 
+                this.winning_combination = "Four of a kind";
+                return 2;
+            }
+            // Full house
+            // In the event of a tie: Highest three matching cards wins the pot.
+            /*
+                In community card games where players have the same three matching cards, 
+                the highest value of the two matching cards wins.
+            */
+            if ((pl_flags & full_house_) == full_house_)
+            {
+                this.winning_combination = "Full house";
+                if ((op_flags & full_house_) == full_house_) return 0;
+                return 1;
+            }
+            else if ((op_flags & full_house_) == full_house_)
+            {
+                this.winning_combination = "Full house";
+                return 2;
+            }
+            // Flush
+            /*
+             In the event of a tie: The player holding the highest ranked card wins. 
+            If necessary, the second-highest, third-highest, fourth-highest, 
+            and fifth-highest cards can be used to break the tie. 
+            If all five cards are the same ranks, the pot is split. 
+            The suit itself is never used to break a tie in poker.
+             */
+            if ((pl_flags & flush_) == flush_)
+            {
+                this.winning_combination = "Flush";
+                if ((op_flags & flush_) == flush_) return 0;
+                return 1;
+            }
+            else if ((op_flags & flush_) == flush_)
+            {
+                this.winning_combination = "Flush";
+                return 2;
+            }
+            // Straight
+            // In the event of a tie: Highest ranking card at the top of the sequence wins.
+            if ((pl_flags & straight_) == straight_)
+            {
+                this.winning_combination = "Straight";
+                if ((op_flags & straight_) == straight_) return 0;
+                return 1;
+            }
+            else if ((op_flags & straight_) == straight_)
+            {
+                this.winning_combination = "Straight";
+                return 2;
+            }
+            // Three of a kind
+            /*
+             In the event of a tie: Highest ranking three of a kind wins. 
+            In community card games where players have the same three of a kind, 
+            the highest side card, and if necessary, the second-highest side card wins.
+             */
+            if ((pl_flags & three_of_a_kind_) == three_of_a_kind_)
+            {
+                this.winning_combination = "Three of a kind";
+                if ((op_flags & three_of_a_kind_) == three_of_a_kind_) return 0;
+                return 1;
+            }
+            else if ((op_flags & three_of_a_kind_) == three_of_a_kind_)
+            {
+                this.winning_combination = "Three of a kind";
+                return 2;
+            }
+            // Two Pair
+            /*
+                In the event of a tie: Highest pair wins. 
+            If players have the same highest pair, highest second pair wins. 
+            If both players have two identical pairs, highest side card wins.
+                */
+            if ((pl_flags & two_pairs_) == two_pairs_)
+            {
+                this.winning_combination = "Two Pair";
+                if ((op_flags & two_pairs_) == two_pairs_) return 0;
+                return 1;
+            }
+            else if ((op_flags & two_pairs_) == two_pairs_)
+            {
+                this.winning_combination = "Two Pair";
+                return 2;
+            }
+            // Pair
+            /*
+             In the event of a tie: Highest pair wins. 
+            If players have the same pair, the highest side card wins, and if necessary, 
+            the second-highest and third-highest side card can be used to break the tie.
+             */
+            if ((pl_flags & one_pair_) == one_pair_)
+            {
+                this.winning_combination = "One Pair";
+                if ((op_flags & one_pair_) == one_pair_) return 0;
+                return 1;
+            }
+            else if ((op_flags & one_pair_) == one_pair_)
+            {
+                this.winning_combination = "One Pair";
+                return 2;
+            }
+            // High card
+            decs.Item1.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
+            {
+                if (x.Item2 == y.Item2) return 0;
+                else if (x.Item2 < y.Item2) return 1;
+                else return -1;
+            });
+            decs.Item2.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
+            {
+                if (x.Item2 == y.Item2) return 0;
+                else if (x.Item2 < y.Item2) return 1;
+                else return -1;
+            });
             for (var i = 0; i < 5; ++i)
             {
                 if (decs.Item1[i].Item2 > decs.Item2[i].Item2) return 1;
                 else if (decs.Item1[i].Item2 < decs.Item2[i].Item2) return 2;
             }
-            */
-            Debug.Write("Player: ");
-            foreach(var i in tmp_pl)
-                Debug.Write("{0};",i);
-            Debug.Write("\nOpponent: ");
-            foreach (var i in tmp_op)
-                Debug.Write("{0};", i);
-            Debug.WriteLine("");
 
-            if ((pl_flags & straight_flush_) == straight_flush_) return 1;
-            if ((op_flags & straight_flush_) == straight_flush_) return 1;
+
+
             return 0;
         }
 

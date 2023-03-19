@@ -12,6 +12,9 @@ namespace CardGame.Pages.Shared.Components
         public int player_bank { get; set; }
         public int opponent_bet { get; set; }
         public int player_bet { get; set; }
+        public string? winning_hand { get; set; }
+        public int who_won { get; set; }
+
 
     }
 }

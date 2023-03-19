@@ -11,7 +11,7 @@ using System.Text;
 using WebAPI;
 using WebAPI.Models;
 
-/*
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,13 +50,28 @@ app.MapGet("/initgame", async (GameStateService game_service) =>
     var temp = new Game();
     var tmp = temp.new_game();
     tmp._id = id;
-
+    tmp.who_won = temp.check_winner(tmp);
+    tmp.winning_hand = temp.winning_combination;
 
     await game_service.Update(id, tmp);
 
     return Results.NoContent();
 });
 
+app.MapPut("/advance/{id}", async (GameStateService game_service, string id) =>
+{
+
+    var game_state = await game_service.Get(id);
+
+    if (game_state is null)
+        return Results.NotFound();
+    var temp = new Game();
+    
+
+    await game_service.Update(id, temp.advance_ingame(game_state));
+
+    return Results.NoContent();
+});
 //=============================
 
 
@@ -99,23 +114,25 @@ app.MapDelete("/game_states/{id}", async (GameStateService game_service, string 
 
 
 
-app.MapGet("/companies", () => "asdas");
 
 app.MapGet("/", () => "Hello World!");
 
-*/
 
+/*
 int winner = 0;
+int counter = 0;
 do
 {
 
     var temp = new Game();
     var tmp = temp.new_game();
-    winner = temp.check_winner(tmp);
-    //System.Diagnostics.Debug.WriteLine(winner.ToString());
-} while (winner == 0);
 
-//app.Run("http://localhost:3000");
+
+    winner = temp.check_winner(tmp);
+    System.Diagnostics.Debug.WriteLine(winner.ToString() + " " + temp.winning_combination);
+} while (++counter < 50);
+*/
+app.Run("http://localhost:3000");
 
 
 

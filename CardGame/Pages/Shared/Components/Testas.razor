@@ -23,6 +23,16 @@
     <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
 </MudAppBar>
 
+@if(gsc.game_state.state == 5)
+{
+    <MudPaper Class="d-flex justify-center">
+    <MudPaper Class="">
+        <img src="Assets/@(gsc.game_state.opponent_hand[0]).svg" style="background-color:red; height: 200px;" />
+         <img src="Assets/@(gsc.game_state.opponent_hand[1]).svg" style="background-color:red; height: 200px;" />
+    </MudPaper>
+    </MudPaper>
+        <br>
+}
 
 <MudPaper Class="d-flex justify-center">
     <MudPaper Class="">
@@ -35,16 +45,14 @@
 <br>
 <MudPaper Class="d-flex justify-center">
     <MudPaper Class="">
-        <img src="Assets/@(gsc.game_state.player_hand[0]).svg" style="background-color:red; height: 300px;" />
-        <img src="Assets/@(gsc.game_state.player_hand[1]).svg" style="background-color:red; height: 300px;" />
-
-    
+        <img src="Assets/@(gsc.game_state.player_hand[0]).svg" style="background-color:red; height: 200px;" />
+        <img src="Assets/@(gsc.game_state.player_hand[1]).svg" style="background-color:red; height: 200px;" />
 </MudPaper>
 
 </MudPaper>
 
-<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">nieko</MudAlert>
-
+<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.game_state.winning_hand</MudAlert>
+<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.game_state.who_won.ToString()</MudAlert>
 
 
 
