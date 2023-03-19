@@ -112,7 +112,7 @@ do
     var temp = new Game();
     var tmp = temp.new_game();
     winner = temp.check_winner(tmp);
-    System.Diagnostics.Debug.WriteLine(winner.ToString());
+    //System.Diagnostics.Debug.WriteLine(winner.ToString());
 } while (winner == 0);
 
 //app.Run("http://localhost:3000");

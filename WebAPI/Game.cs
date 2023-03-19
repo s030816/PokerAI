@@ -1,10 +1,23 @@
-﻿using WebAPI.Models;
+﻿using Microsoft.AspNetCore.Mvc.Razor.Infrastructure;
+using System.Diagnostics;
+using WebAPI.Models;
 
 namespace WebAPI
 {
     public class Game
     {
         public List<string> cards_ = new List<string>();
+
+        private ulong flush_ =              0b000000001;
+        private ulong straight_ =           0b000000010;
+        private ulong four_of_a_kind_ =     0b000000100;
+        private ulong three_of_a_kind_ =    0b000001000;
+        private ulong two_pairs_ =          0b000010000;
+        private ulong one_pair_ =           0b000100000;
+        private ulong full_house_ =         0b001000000;
+        private ulong straight_flush_ =     0b010000000;
+        private ulong royal_flush_ =        0b100000000;
+
         public Game() 
         {
             for(var i = 0; i < 4; ++i)
@@ -74,38 +87,85 @@ namespace WebAPI
             }
             return current;
         }
+
+
+
         // A K K Q J 10 2
         // A K Q J 10 2
-        private bool is_straight(List<Tuple<int, int>> deck)
+        private void mark_hands(List<Tuple<int, int>> deck, ref ulong flags, ref List<Tuple<int,int>> count_deck)
         {
             var tmp_deck = new List<int>();
             for(var i = 0; i < 7; ++i) 
             {
                 tmp_deck.Add(deck[i].Item2);
             }
+
+            count_deck = tmp_deck.GroupBy(x => x)
+              .Where(g => g.Count() > 1)
+              .Select(y => new Tuple<int,int>(y.Key, y.Count() ))
+              .ToList();
+
+            foreach(var item in count_deck)
+            {
+                if (item.Item2 == 4) flags |= four_of_a_kind_;
+                if (item.Item2 == 3) 
+                {
+                    if ((flags & one_pair_) == one_pair_) flags |= full_house_;
+                    flags |= three_of_a_kind_;
+                } 
+                if (item.Item2 == 2) 
+                {
+                    if((flags & one_pair_) == one_pair_) flags |= two_pairs_;
+                    if((flags & three_of_a_kind_) == three_of_a_kind_) flags |= full_house_;
+                    flags |= one_pair_;
+                } 
+            }
+
             tmp_deck = tmp_deck.Distinct().ToList();
-            if (tmp_deck.Count < 5) return false;
-            tmp_deck.Sort();
-          // remake to Highest straigth
+            if (tmp_deck.Count < 5) return;
+            tmp_deck.Sort((a, b) => b.CompareTo(a));
+            int high_card = 0;
+            this.is_flush(ref deck, ref flags, ref high_card);
+
+            // Implement special case "the wheel"
+            // Straight flush logic is broken. Check if all cards are of the same type
             for (var j = 0; j < tmp_deck.Count - 4; ++j)
             {
-                if (tmp_deck[j] == tmp_deck[j + 4] - 4) return true;
+                if (tmp_deck[j] == tmp_deck[j + 4] + 4) 
+                {
+                    if (tmp_deck[j] == high_card)
+                    {
+                        flags |= straight_flush_;
+                        if(high_card == 14) flags |= royal_flush_;
+                    }
+                    
+                    flags |= straight_;
+                    return;
+                }
             }
-            // Implement special case "the wheel"
-            return false;
+            
+
         }
-        private bool is_flush(List<Tuple<int, int>> deck)
+        private void is_flush(ref List<Tuple<int, int>> deck, ref ulong flags, ref int high_card)
         {
             int[] tmp_deck = new int[4];
+
             for (var i = 0; i < 7; ++i)
             {
                 ++tmp_deck[deck[i].Item1];
             }
-            foreach(var i in tmp_deck)
+            for(var i = 0; i < 4; ++i)
             {
-                if (i >= 5) return true;
+                if (tmp_deck[i] >= 5)
+                {
+                    foreach(var j in deck)
+                    {
+                        if(j.Item1 == i && j.Item2 > high_card) high_card = j.Item2;
+                    }
+                    flags |= flush_;
+                    return;
+                } 
             }
-            return false;
         }
 
         private Tuple<List<Tuple<int,int>>, List<Tuple<int, int>>> extract_card(List<string> deck, List<string> phand, List<string> ohand)
@@ -126,7 +186,7 @@ namespace WebAPI
             extract(phand,dec_cpy);
             extract(ohand,extracted_deck);
 
-
+            /*
             dec_cpy.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
             {
                 if (x.Item2 == y.Item2) return 0;
@@ -139,10 +199,18 @@ namespace WebAPI
                 else if (x.Item2 < y.Item2) return 1;
                 else return -1;
             });
-
+            */
 
             return new Tuple<List<Tuple<int, int>>, List<Tuple<int, int>>>(dec_cpy,extracted_deck);
         }
+
+        /**
+         * TODO:
+         * Implement winning hand export
+         * Implement high card counter
+         * Implement The wheel straingt
+         * Straight flush logic is broken. 
+         */
 
         public int check_winner(GameState current)
         {
@@ -160,44 +228,48 @@ namespace WebAPI
                 System.Diagnostics.Debug.Write(String.Format("{0}-{1};", i.Item1.ToString(), i.Item2.ToString()));
             }
             System.Diagnostics.Debug.WriteLine("");
-            int flush_flag = 0;
-            
-            if(is_flush(decs.Item1))
-            {
-                flush_flag |= 0x1;
-            }
-            if(is_flush(decs.Item2))
-            {
-                flush_flag |= 0x2;
-            }
 
+            ulong op_flags = 0;
+            ulong pl_flags = 0;
+            var counting_deck = new List<Tuple<int, int>>();
+            var counting_deck_op = new List<Tuple<int, int>>();
+
+            mark_hands(decs.Item1, ref pl_flags,ref counting_deck);
+            mark_hands(decs.Item2, ref op_flags, ref counting_deck_op);
+
+            Debug.WriteLine(Convert.ToString((long)pl_flags, 2));
+            Debug.WriteLine(Convert.ToString((long)op_flags, 2));
+            var tmp_pl = new List<string>();
+            var tmp_op = new List<string>();
 
 
             // Royal Flush
-            if (flush_flag != 0)
-            {
-
-            }
+            if ((pl_flags & royal_flush_) == royal_flush_) tmp_pl.Add("Royal Flush");
+            if ((op_flags & royal_flush_) == royal_flush_) tmp_op.Add("Royal Flush");
             // Straight flush
+            if ((pl_flags & straight_flush_) == straight_flush_) tmp_pl.Add("Straight flush");
+            if ((op_flags & straight_flush_) == straight_flush_) tmp_op.Add("Straight flush");
             // Four of a kind
+            if ((pl_flags & four_of_a_kind_) == four_of_a_kind_) tmp_pl.Add("Four of a kind");
+            if ((op_flags & four_of_a_kind_) == four_of_a_kind_) tmp_op.Add("Four of a kind");
             // Full house
+            if ((pl_flags & full_house_) == full_house_) tmp_pl.Add("Full house");
+            if ((op_flags & full_house_) == full_house_) tmp_op.Add("Full house");
             // Flush
-            if (flush_flag != 0)
-            {
-                return flush_flag;
-            }
-
+            if ((pl_flags & flush_) == flush_) tmp_pl.Add("Flush");
+            if ((op_flags & flush_) == flush_) tmp_op.Add("Flush");
             // Straight
-            /*
-            playerWin = is_straight(decs.Item1);
-            opponentWin = is_straight(decs.Item2);
-            if (playerWin && !opponentWin) return 1;
-            else if(!playerWin && opponentWin) return 2;
-            */
+            if ((pl_flags & straight_) == straight_) tmp_pl.Add("Straight");
+            if ((op_flags & straight_) == straight_) tmp_op.Add("Straight");
             // Three of a kind
+            if ((pl_flags & three_of_a_kind_) == three_of_a_kind_) tmp_pl.Add("Three of a kind");
+            if ((op_flags & three_of_a_kind_) == three_of_a_kind_) tmp_op.Add("Three of a kind");
             // Two Pair
+            if ((pl_flags & two_pairs_) == two_pairs_) tmp_pl.Add("Two Pair");
+            if ((op_flags & two_pairs_) == two_pairs_) tmp_op.Add("Two Pair");
             // Pair
-
+            if ((pl_flags & one_pair_) == one_pair_) tmp_pl.Add("One Pair");
+            if ((op_flags & one_pair_) == one_pair_) tmp_op.Add("One Pair");
             // High card
             /*
             for (var i = 0; i < 5; ++i)
@@ -206,6 +278,16 @@ namespace WebAPI
                 else if (decs.Item1[i].Item2 < decs.Item2[i].Item2) return 2;
             }
             */
+            Debug.Write("Player: ");
+            foreach(var i in tmp_pl)
+                Debug.Write("{0};",i);
+            Debug.Write("\nOpponent: ");
+            foreach (var i in tmp_op)
+                Debug.Write("{0};", i);
+            Debug.WriteLine("");
+
+            if ((pl_flags & straight_flush_) == straight_flush_) return 1;
+            if ((op_flags & straight_flush_) == straight_flush_) return 1;
             return 0;
         }
 
