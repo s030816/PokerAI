@@ -12,11 +12,11 @@
 <MudAppBar Color="Color.Primary" Fixed="false">
 
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
-    <MudButton Variant="Variant.Filled" Color="Color.Info">Call</MudButton>
+    <MudButton OnClick="CallClick" Variant="Variant.Filled" Color="Color.Info">Call</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Secondary">Raise</MudButton>
     <MudButton Variant="Variant.Filled" Color="Color.Info">Fold</MudButton>
-    <p>Balance: @gsc.game_state.player_bank.ToString()</p>
-    <p>@(((Game_State)gsc.game_state.state).ToString())</p>
+    <p>Balance: @(gsc.game_state.player_bank.ToString()) + </p>
+    <p>@(((Game_State)gsc.game_state.state).ToString()) + </p>
     <p>Oponent: @gsc.game_state.opponent_bank.ToString()</p>
     <MudSpacer />
     
@@ -52,7 +52,7 @@
 </MudPaper>
 
 <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.game_state.winning_hand</MudAlert>
-<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.game_state.who_won.ToString()</MudAlert>
+<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@who_won()</MudAlert>
 
 
 
@@ -75,12 +75,25 @@
     private string? displayDeck = "display:none;";
     private GameStateController gsc = new GameStateController();
     private string? message = "testas";
-    // @onclick="() => testas()"
-    // <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.message</MudAlert>
-    private void test()
-    {
+    ElementReference myRef = new ElementReference();
 
-        //state = (state + 1) % 4;
-        displayDeck = "";
+    // @onclick="() => test()"
+    // <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.message</MudAlert>
+    private void CallClick()
+    {
+        gsc.OnPutProcess();
+        gsc.OnGetProcessRequest();
+        //this.StateHasChanged();
+    }
+    private string who_won()
+    {
+        switch(gsc.game_state.who_won)
+        {
+            case -1:return "In progress";
+            case 0: return "Tie";
+            case 1: return "Player Won";
+            case 2: return "Opponent Won";
+            default: return "Error";
+        }
     }
 }

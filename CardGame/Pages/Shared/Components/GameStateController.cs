@@ -2,6 +2,7 @@
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Channels;
 using Microsoft.AspNetCore.Components.Web;
 
 namespace CardGame.Pages.Shared.Components
@@ -15,7 +16,7 @@ namespace CardGame.Pages.Shared.Components
         {
             //this.OnGetProcessRequestAsync();
             this.init_process();
-            this.OnGetProcessRequest();
+            //this.OnGetProcessRequest();
         }
         public async void OnGetProcessRequestAsync()
         {
@@ -37,7 +38,7 @@ namespace CardGame.Pages.Shared.Components
         }
         public void OnGetProcessRequest()
         {
-            string request_url = "http://localhost:3000/game_state";
+            string request_url = "http://localhost:3000/game_state/" + game_state._id;
 
 
             var webRequest = new HttpRequestMessage(HttpMethod.Get, request_url);
@@ -46,7 +47,7 @@ namespace CardGame.Pages.Shared.Components
 
             using var reader = new StreamReader(response.Content.ReadAsStream());
             message = reader.ReadToEnd();
-            game_state = JsonSerializer.Deserialize<List<GameState>>(message).First();
+            game_state = JsonSerializer.Deserialize<GameState>(message);
             
         }
         public void init_process()
@@ -57,17 +58,22 @@ namespace CardGame.Pages.Shared.Components
             var webRequest = new HttpRequestMessage(HttpMethod.Get, request_url);
 
             var response = HTTPClient.Send(webRequest);
+            using var reader = new StreamReader(response.Content.ReadAsStream());
+            message = reader.ReadToEnd();
+            game_state = JsonSerializer.Deserialize<GameState>(message);
         }
 
         public void OnPutProcess()
         {
-            string request_url = "http://localhost:3000/game_state";
+            string request_url = "http://localhost:3000/advance/" + game_state._id;
+            /*
+            var content = new FormUrlEncodedContent(new[] {
+                new KeyValuePair<string, string>("id", "6410dc0ebb023e49d13004c4")
+            });
+            */
+            var webRequest = new HttpRequestMessage(HttpMethod.Put, request_url);
 
-
-            var webRequest = new HttpRequestMessage(HttpMethod.Put, request_url)
-            {
-
-            };
+            //webRequest.Content = content;
 
             var response = HTTPClient.Send(webRequest);
         }

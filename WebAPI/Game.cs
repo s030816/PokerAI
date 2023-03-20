@@ -53,6 +53,7 @@ namespace WebAPI
         {
             var state = new GameState();
             var deck = this.get_random_cards(9);
+            state.state = 0;
             state.player_hand = new List<string>();
             state.opponent_hand = new List<string>();
             state.deck = new List<string>();
@@ -66,6 +67,8 @@ namespace WebAPI
             }
             state.opponent_bank = 150;
             state.player_bank = 150;
+            state.winning_hand = "None";
+            state.who_won = -1;
             return state;
         }
 
@@ -80,10 +83,14 @@ namespace WebAPI
                     current.state = 4;
                     break;
                 case 4:
+                    current.who_won = this.check_winner(current);
+                    current.winning_hand = this.winning_combination;
                     current.state = 5;
                     break;
                 case 5:
-                    current.state = 0;
+                    var tmp = current._id;
+                    current = this.new_game();
+                    current._id= tmp;
                     break;
                 default:
                     return null;
@@ -238,7 +245,6 @@ namespace WebAPI
         public int check_winner(GameState current)
         {
             var decs = this.extract_card(current.deck, current.player_hand, current.opponent_hand);
-            if (current.state != 5) return -1;
 
             foreach (var i in decs.Item1)
             {
