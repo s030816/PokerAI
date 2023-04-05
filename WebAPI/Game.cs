@@ -9,6 +9,7 @@ namespace WebAPI
     {
         public List<string> cards_ = new List<string>();
         public string winning_combination = "High Card";
+        NeuronNetwork nn = new NeuronNetwork();
 
         private ulong flush_ =              0b000000001;
         private ulong straight_ =           0b000000010;
@@ -75,7 +76,7 @@ namespace WebAPI
 
         public void simulate()
         {
-            int data_size = 500;
+            int data_size = 10000;
             double[][] inputs = new double[data_size][];
             double[][] outputs = new double[data_size][];
             for (var i = 0; i < data_size; ++i)
@@ -92,11 +93,17 @@ namespace WebAPI
                 inputs[i][0] = (Convert.ToDouble(parts[0])*13+ Convert.ToDouble(parts[1]))/100.0f;
                 inputs[i][1] = (Convert.ToDouble(parts1[0]) * 13 + Convert.ToDouble(parts1[1])) / 100.0f;
 
+                if(inputs[i][0] > inputs[i][1])
+                {
+                    var swap = inputs[i][0];
+                    inputs[i][0] = inputs[i][1];
+                    inputs[i][1] = swap;
+                }
 
                 outputs[i][0] = this.check_winner(tmp) == 2? 1:0;
-                System.Diagnostics.Debug.WriteLine(String.Format("{0} {1} - {2}", inputs[i][0], inputs[i][1], outputs[i][0]));
+                //System.Diagnostics.Debug.WriteLine(String.Format("{0} {1} - {2}", inputs[i][0], inputs[i][1], outputs[i][0]));
             }
-            NeuronNetwork nn = new NeuronNetwork();
+
             System.Diagnostics.Debug.WriteLine("Starting................................");
             System.Diagnostics.Debug.WriteLine(nn.test(ref inputs, ref outputs));
             System.Diagnostics.Debug.WriteLine("Finishing................................");
@@ -271,6 +278,27 @@ namespace WebAPI
          * TODO:
          * Implement high card counter
          */
+        private int high_card(ref Tuple<List<Tuple<int, int>>, List<Tuple<int, int>>> decs)
+        {
+            decs.Item1.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
+            {
+                if (x.Item2 == y.Item2) return 0;
+                else if (x.Item2 < y.Item2) return 1;
+                else return -1;
+            });
+            decs.Item2.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
+            {
+                if (x.Item2 == y.Item2) return 0;
+                else if (x.Item2 < y.Item2) return 1;
+                else return -1;
+            });
+            for (var i = 0; i < 5; ++i)
+            {
+                if (decs.Item1[i].Item2 > decs.Item2[i].Item2) return 1;
+                else if (decs.Item1[i].Item2 < decs.Item2[i].Item2) return 2;
+            }
+            return 0;
+        }
 
         public int check_winner(GameState current)
         {
@@ -305,7 +333,7 @@ namespace WebAPI
             if ((pl_flags & royal_flush_) == royal_flush_)
             {
                 this.winning_combination = "Royal Flush";
-                if ((op_flags & royal_flush_) == royal_flush_) return 0;
+                if ((op_flags & royal_flush_) == royal_flush_) return high_card(ref decs);
                 return 1;
             }
             else if ((op_flags & royal_flush_) == royal_flush_) 
@@ -318,7 +346,7 @@ namespace WebAPI
             if ((pl_flags & straight_flush_) == straight_flush_) 
             {
                 this.winning_combination = "Straight flush";
-                if ((op_flags & straight_flush_) == straight_flush_) return 0;
+                if ((op_flags & straight_flush_) == straight_flush_) return high_card(ref decs);
                 return 1;
             }
             else if ((op_flags & straight_flush_) == straight_flush_) 
@@ -335,7 +363,7 @@ namespace WebAPI
             if ((pl_flags & four_of_a_kind_) == four_of_a_kind_)
             {
                 this.winning_combination = "Four of a kind";
-                if ((op_flags & four_of_a_kind_) == four_of_a_kind_) return 0;
+                if ((op_flags & four_of_a_kind_) == four_of_a_kind_) return high_card(ref decs);
                 return 1;
             }
             else if ((op_flags & four_of_a_kind_) == four_of_a_kind_)
@@ -352,7 +380,7 @@ namespace WebAPI
             if ((pl_flags & full_house_) == full_house_)
             {
                 this.winning_combination = "Full house";
-                if ((op_flags & full_house_) == full_house_) return 0;
+                if ((op_flags & full_house_) == full_house_) return high_card(ref decs);
                 return 1;
             }
             else if ((op_flags & full_house_) == full_house_)
@@ -371,7 +399,7 @@ namespace WebAPI
             if ((pl_flags & flush_) == flush_)
             {
                 this.winning_combination = "Flush";
-                if ((op_flags & flush_) == flush_) return 0;
+                if ((op_flags & flush_) == flush_) return high_card(ref decs);
                 return 1;
             }
             else if ((op_flags & flush_) == flush_)
@@ -384,7 +412,7 @@ namespace WebAPI
             if ((pl_flags & straight_) == straight_)
             {
                 this.winning_combination = "Straight";
-                if ((op_flags & straight_) == straight_) return 0;
+                if ((op_flags & straight_) == straight_) return high_card(ref decs);
                 return 1;
             }
             else if ((op_flags & straight_) == straight_)
@@ -401,7 +429,7 @@ namespace WebAPI
             if ((pl_flags & three_of_a_kind_) == three_of_a_kind_)
             {
                 this.winning_combination = "Three of a kind";
-                if ((op_flags & three_of_a_kind_) == three_of_a_kind_) return 0;
+                if ((op_flags & three_of_a_kind_) == three_of_a_kind_) return high_card(ref decs);
                 return 1;
             }
             else if ((op_flags & three_of_a_kind_) == three_of_a_kind_)
@@ -418,7 +446,7 @@ namespace WebAPI
             if ((pl_flags & two_pairs_) == two_pairs_)
             {
                 this.winning_combination = "Two Pair";
-                if ((op_flags & two_pairs_) == two_pairs_) return 0;
+                if ((op_flags & two_pairs_) == two_pairs_) return high_card(ref decs);
                 return 1;
             }
             else if ((op_flags & two_pairs_) == two_pairs_)
@@ -435,7 +463,7 @@ namespace WebAPI
             if ((pl_flags & one_pair_) == one_pair_)
             {
                 this.winning_combination = "One Pair";
-                if ((op_flags & one_pair_) == one_pair_) return 0;
+                if ((op_flags & one_pair_) == one_pair_) return high_card(ref decs);
                 return 1;
             }
             else if ((op_flags & one_pair_) == one_pair_)
@@ -444,27 +472,11 @@ namespace WebAPI
                 return 2;
             }
             // High card
-            decs.Item1.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
-            {
-                if (x.Item2 == y.Item2) return 0;
-                else if (x.Item2 < y.Item2) return 1;
-                else return -1;
-            });
-            decs.Item2.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
-            {
-                if (x.Item2 == y.Item2) return 0;
-                else if (x.Item2 < y.Item2) return 1;
-                else return -1;
-            });
-            for (var i = 0; i < 5; ++i)
-            {
-                if (decs.Item1[i].Item2 > decs.Item2[i].Item2) return 1;
-                else if (decs.Item1[i].Item2 < decs.Item2[i].Item2) return 2;
-            }
 
 
 
-            return 0;
+
+            return high_card(ref decs);
         }
 
     }
