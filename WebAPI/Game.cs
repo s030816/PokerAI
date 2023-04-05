@@ -32,7 +32,7 @@ namespace WebAPI
                     cards_.Add(String.Format("{0}-{1}",i,j));
                 }
             }
-            
+            this.simulate();
         }
         public List<string> get_random_cards(int list_size)
         {
@@ -75,9 +75,10 @@ namespace WebAPI
 
         public void simulate()
         {
-            double[][] inputs = new double[50][];
-            double[][] outputs = new double[50][];
-            for (var i = 0; i < 50; ++i)
+            int data_size = 500;
+            double[][] inputs = new double[data_size][];
+            double[][] outputs = new double[data_size][];
+            for (var i = 0; i < data_size; ++i)
             {
                 var tmp = this.new_game();
                 inputs[i] = new double[2];
@@ -88,14 +89,17 @@ namespace WebAPI
                 if (parts[1] == "1") parts[1] = "14";
                 if (parts1[1] == "1") parts1[1] = "14";
 
-                inputs[i][0] = Convert.ToDouble(parts[0])*13+ Convert.ToDouble(parts[1]);
-                inputs[i][1] = Convert.ToDouble(parts1[0]) * 13 + Convert.ToDouble(parts1[1]);
+                inputs[i][0] = (Convert.ToDouble(parts[0])*13+ Convert.ToDouble(parts[1]))/100.0f;
+                inputs[i][1] = (Convert.ToDouble(parts1[0]) * 13 + Convert.ToDouble(parts1[1])) / 100.0f;
 
 
-                outputs[i][0] = this.check_winner(tmp);
+                outputs[i][0] = this.check_winner(tmp) == 2? 1:0;
+                System.Diagnostics.Debug.WriteLine(String.Format("{0} {1} - {2}", inputs[i][0], inputs[i][1], outputs[i][0]));
             }
             NeuronNetwork nn = new NeuronNetwork();
-            nn.test(ref inputs, ref outputs);
+            System.Diagnostics.Debug.WriteLine("Starting................................");
+            System.Diagnostics.Debug.WriteLine(nn.test(ref inputs, ref outputs));
+            System.Diagnostics.Debug.WriteLine("Finishing................................");
         }
 
         public GameState advance_ingame(GameState current)
@@ -271,7 +275,7 @@ namespace WebAPI
         public int check_winner(GameState current)
         {
             var decs = this.extract_card(current.deck, current.player_hand, current.opponent_hand);
-
+            /*
             foreach (var i in decs.Item1)
             {
                 System.Diagnostics.Debug.Write(String.Format("{0}-{1};",i.Item1.ToString(), i.Item2.ToString()));
@@ -283,7 +287,7 @@ namespace WebAPI
                 System.Diagnostics.Debug.Write(String.Format("{0}-{1};", i.Item1.ToString(), i.Item2.ToString()));
             }
             System.Diagnostics.Debug.WriteLine("");
-
+            */
             ulong op_flags = 0;
             ulong pl_flags = 0;
             var counting_deck = new List<Tuple<int, int>>();
@@ -292,8 +296,8 @@ namespace WebAPI
             mark_hands(decs.Item1, ref pl_flags,ref counting_deck);
             mark_hands(decs.Item2, ref op_flags, ref counting_deck_op);
 
-            Debug.WriteLine(Convert.ToString((long)pl_flags, 2));
-            Debug.WriteLine(Convert.ToString((long)op_flags, 2));
+            //Debug.WriteLine(Convert.ToString((long)pl_flags, 2));
+            //Debug.WriteLine(Convert.ToString((long)op_flags, 2));
 
 
 

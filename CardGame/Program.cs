@@ -78,4 +78,6 @@ app.UseEndpoints(endpoints =>
     endpoints.MapBlazorHub();
 });
 
+
+
 app.Run();
