@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Razor.Infrastructure;
 using System.Diagnostics;
 using WebAPI.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace WebAPI
 {
@@ -70,6 +71,31 @@ namespace WebAPI
             state.winning_hand = "None";
             state.who_won = -1;
             return state;
+        }
+
+        public void simulate()
+        {
+            double[][] inputs = new double[50][];
+            double[][] outputs = new double[50][];
+            for (var i = 0; i < 50; ++i)
+            {
+                var tmp = this.new_game();
+                inputs[i] = new double[2];
+                outputs[i] = new double[1];
+
+                var parts = tmp.opponent_hand[0].Split('-');
+                var parts1 = tmp.opponent_hand[1].Split('-');
+                if (parts[1] == "1") parts[1] = "14";
+                if (parts1[1] == "1") parts1[1] = "14";
+
+                inputs[i][0] = Convert.ToDouble(parts[0])*13+ Convert.ToDouble(parts[1]);
+                inputs[i][1] = Convert.ToDouble(parts1[0]) * 13 + Convert.ToDouble(parts1[1]);
+
+
+                outputs[i][0] = this.check_winner(tmp);
+            }
+            NeuronNetwork nn = new NeuronNetwork();
+            nn.test(ref inputs, ref outputs);
         }
 
         public GameState advance_ingame(GameState current)
