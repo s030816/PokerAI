@@ -63,6 +63,19 @@ namespace CardGame.Pages.Shared.Components
             game_state = JsonSerializer.Deserialize<GameState>(message);
         }
 
+        public double get_error()
+        {
+            string request_url = "http://localhost:3000/train";
+
+
+            var webRequest = new HttpRequestMessage(HttpMethod.Get, request_url);
+
+            var response = HTTPClient.Send(webRequest);
+            using var reader = new StreamReader(response.Content.ReadAsStream());
+            message = reader.ReadToEnd();
+            return double.Parse(message);
+        }
+
         public void OnPutProcess()
         {
             string request_url = "http://localhost:3000/advance/" + game_state._id;

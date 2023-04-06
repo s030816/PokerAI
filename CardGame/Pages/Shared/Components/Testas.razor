@@ -13,7 +13,7 @@
 
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
     <MudButton OnClick="CallClick" Variant="Variant.Filled" Color="Color.Info">Call</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Secondary">Raise</MudButton>
+    <MudButton OnClick="RaiseClick" Variant="Variant.Filled" Color="Color.Secondary">Raise</MudButton>
     <MudButton Variant="Variant.Filled" Color="Color.Info">Fold</MudButton>
     
     <p>Balance: @(gsc.game_state.player_bank.ToString()) + </p>
@@ -52,10 +52,12 @@
 
 </MudPaper>
 
-<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize" Style="width: 350px;" />
-<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize1" Style="width: 350px;" />
-<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize2" Style="width: 350px;" />
-<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize3" Style="width: 350px;" />
+<MudPaper Class="d-flex">
+<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize" Style="width: 150px;" />
+<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize1" Style="width: 150px;" />
+<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize2" Style="width: 150px;" />
+<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize3" Style="width: 150px;" />
+</MudPaper>
 <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.game_state.winning_hand</MudAlert>
 <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@who_won()</MudAlert>
 
@@ -98,7 +100,7 @@
     }
     private void RaiseClick()
     {
-        
+        neuralSize1 = gsc.get_error();
     }
     private string who_won()
     {

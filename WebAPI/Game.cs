@@ -9,7 +9,6 @@ namespace WebAPI
     {
         public List<string> cards_ = new List<string>();
         public string winning_combination = "High Card";
-        NeuronNetwork nn = new NeuronNetwork();
 
         private ulong flush_ =              0b000000001;
         private ulong straight_ =           0b000000010;
@@ -73,7 +72,7 @@ namespace WebAPI
             return state;
         }
 
-        public void simulate()
+        public double simulate()
         {
             int data_size = 10000;
             double[][] inputs = new double[data_size][];
@@ -84,13 +83,10 @@ namespace WebAPI
                 inputs[i] = new double[2];
                 outputs[i] = new double[1];
 
-                var parts = tmp.opponent_hand[0].Split('-');
-                var parts1 = tmp.opponent_hand[1].Split('-');
-                if (parts[1] == "1") parts[1] = "14";
-                if (parts1[1] == "1") parts1[1] = "14";
+                var decs = this.extract_card(tmp.deck, tmp.player_hand, tmp.opponent_hand);
 
-                inputs[i][0] = (Convert.ToDouble(parts[0])*13+ Convert.ToDouble(parts[1]))/100.0f;
-                inputs[i][1] = (Convert.ToDouble(parts1[0]) * 13 + Convert.ToDouble(parts1[1])) / 100.0f;
+                inputs[i][0] = (decs.Item2[5].Item1 * 13+ decs.Item2[5].Item2) /100.0f;
+                inputs[i][1] = (decs.Item2[6].Item1 * 13 + decs.Item2[6].Item2) / 100.0f;
 
                 if(inputs[i][0] > inputs[i][1])
                 {
@@ -100,12 +96,13 @@ namespace WebAPI
                 }
 
                 outputs[i][0] = this.check_winner(tmp) == 2? 1:0;
-                //System.Diagnostics.Debug.WriteLine(String.Format("{0} {1} - {2}", inputs[i][0], inputs[i][1], outputs[i][0]));
+                System.Diagnostics.Debug.WriteLine(String.Format("{0} {1} - {2}", inputs[i][0], inputs[i][1], outputs[i][0]));
             }
-
+            var test = new NeuronNetwork("preflop");
+            
             System.Diagnostics.Debug.WriteLine("Starting................................");
-            System.Diagnostics.Debug.WriteLine(nn.test(ref inputs, ref outputs));
-            System.Diagnostics.Debug.WriteLine("Finishing................................");
+            return test.train(ref inputs, ref outputs);
+
         }
 
         public GameState advance_ingame(GameState current)
@@ -279,6 +276,7 @@ namespace WebAPI
          */
         private int high_card(ref Tuple<List<Tuple<int, int>>, List<Tuple<int, int>>> decs)
         {
+            /*
             decs.Item1.Sort(delegate (Tuple<int, int> x, Tuple<int, int> y)
             {
                 if (x.Item2 == y.Item2) return 0;
@@ -291,11 +289,30 @@ namespace WebAPI
                 else if (x.Item2 < y.Item2) return 1;
                 else return -1;
             });
+            
             for (var i = 0; i < 5; ++i)
             {
                 if (decs.Item1[i].Item2 > decs.Item2[i].Item2) return 1;
                 else if (decs.Item1[i].Item2 < decs.Item2[i].Item2) return 2;
             }
+            */
+            if (decs.Item1[5].Item2 < decs.Item1[6].Item2)
+            {
+                var tmp = decs.Item1[5];
+                decs.Item1[5] = decs.Item1[6];
+                decs.Item1[6] = tmp;
+            }
+            if (decs.Item2[5].Item2 < decs.Item2[6].Item2)
+            {
+                var tmp = decs.Item2[5];
+                decs.Item2[5] = decs.Item2[6];
+                decs.Item2[6] = tmp;
+            }
+
+            if (decs.Item1[5].Item2 > decs.Item2[5].Item2) return 1;
+            else if (decs.Item1[5].Item2 < decs.Item2[5].Item2) return 2;
+            if (decs.Item1[6].Item2 > decs.Item2[6].Item2) return 1;
+            else if (decs.Item1[6].Item2 < decs.Item2[6].Item2) return 2;
             return 0;
         }
 
