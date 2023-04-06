@@ -49,6 +49,15 @@ app.MapGet("/initgame", async (GameStateService game_service) =>
 
 });
 
+app.MapGet("/train", async (GameStateService game_service) =>
+{
+
+    
+    return Results.Created($"/game_state/123", "ok");
+
+
+});
+
 app.MapPut("/advance/{id}", async (GameStateService game_service, string id) =>
 {
 

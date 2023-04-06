@@ -15,6 +15,7 @@
     <MudButton OnClick="CallClick" Variant="Variant.Filled" Color="Color.Info">Call</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Secondary">Raise</MudButton>
     <MudButton Variant="Variant.Filled" Color="Color.Info">Fold</MudButton>
+    
     <p>Balance: @(gsc.game_state.player_bank.ToString()) + </p>
     <p>@(((Game_State)gsc.game_state.state).ToString()) + </p>
     <p>Oponent: @gsc.game_state.opponent_bank.ToString()</p>
@@ -51,6 +52,10 @@
 
 </MudPaper>
 
+<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize" Style="width: 350px;" />
+<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize1" Style="width: 350px;" />
+<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize2" Style="width: 350px;" />
+<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize3" Style="width: 350px;" />
 <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.game_state.winning_hand</MudAlert>
 <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@who_won()</MudAlert>
 
@@ -77,6 +82,12 @@
     private string? message = "testas";
     ElementReference myRef = new ElementReference();
 
+    public double? neuralSize = 100.0;
+    public double? neuralSize1 = 100.0;
+    public double? neuralSize2 = 100.0;
+    public double? neuralSize3 = 100.0;
+
+
     // @onclick="() => test()"
     // <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.message</MudAlert>
     private void CallClick()
@@ -84,6 +95,10 @@
         gsc.OnPutProcess();
         gsc.OnGetProcessRequest();
         //this.StateHasChanged();
+    }
+    private void RaiseClick()
+    {
+        
     }
     private string who_won()
     {

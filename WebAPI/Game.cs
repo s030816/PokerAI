@@ -33,7 +33,6 @@ namespace WebAPI
                     cards_.Add(String.Format("{0}-{1}",i,j));
                 }
             }
-            this.simulate();
         }
         public List<string> get_random_cards(int list_size)
         {
