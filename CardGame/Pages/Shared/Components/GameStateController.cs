@@ -63,17 +63,17 @@ namespace CardGame.Pages.Shared.Components
             game_state = JsonSerializer.Deserialize<GameState>(message);
         }
 
-        public double get_error()
+        public string get_error(int iter, int sample_s, int ns1, int ns2)
         {
             string request_url = "http://localhost:3000/train";
+            var url = $"{request_url}?iter={iter}&sample_s={sample_s}&ns1={ns1}&ns2={ns2}";
 
-
-            var webRequest = new HttpRequestMessage(HttpMethod.Get, request_url);
+            var webRequest = new HttpRequestMessage(HttpMethod.Get, url);
 
             var response = HTTPClient.Send(webRequest);
             using var reader = new StreamReader(response.Content.ReadAsStream());
             message = reader.ReadToEnd();
-            return double.Parse(message);
+            return message;
         }
 
         public void OnPutProcess()

@@ -49,10 +49,11 @@ app.MapGet("/initgame", async (GameStateService game_service) =>
 
 });
 
-app.MapGet("/train", async (GameStateService game_service) =>
+app.MapGet("/train", 
+    async (GameStateService game_service, int iter, int sample_s, int ns1, int ns2) =>
 {
     var temp = new Game();
-    var error = temp.simulate();
+    var error = temp.simulate(iter, sample_s, ns1, ns2);
     return Results.Created($"/train/errorval=", error);
 
 
