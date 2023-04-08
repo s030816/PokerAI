@@ -4,6 +4,7 @@ using Accord.Neuro.Learning;
 using MongoDB.Bson;
 using Newtonsoft.Json;
 using MongoDB.Driver;
+using Newtonsoft.Json.Linq;
 
 namespace WebAPI
 {
@@ -12,36 +13,32 @@ namespace WebAPI
         private ActivationNetwork? network_;
         private string? collname_;
         public double error = double.PositiveInfinity;
-        public NeuronNetwork(string gameState)
+        public NeuronNetwork(string gameState, int inputN, int hiddenN, int outputN)
         {
             collname_= gameState;
-            mongodb_import();
+            //mongodb_import();
             if(network_==null)
             {
                 network_ = new ActivationNetwork(
                 //new GaussianFunction(), // Activation function
                 new SigmoidFunction(),
-                2, // Input neurons
-                10, // Hidden neurons
-                1); // Output neurons
+                inputN, // Input neurons
+                hiddenN, // Hidden neurons
+                outputN); // Output neurons
             }
 
         }
-        public double train(ref double[][] inputs,ref double[][] outputs)
+        public double train(ref double[][] inputs,ref double[][] outputs, int iteration)
         {
 
             // Create the backpropagation learning algorithm
             BackPropagationLearning teacher = new BackPropagationLearning(network_);
 
-            // Train the neural network
-            int i = 1000;
-
-            while (i-- > 0)
+            while (iteration-- > 0)
             {
                 error = teacher.RunEpoch(inputs, outputs);
-                
             }
-            mongodb_export();
+            //mongodb_export();
             return error;
 
         }
@@ -54,9 +51,9 @@ namespace WebAPI
         {
             var client = new MongoClient("mongodb://localhost:27017");
             var database = client.GetDatabase("CardGame");
-            var json = JsonConvert.SerializeObject(network_, Formatting.None, new JsonSerializerSettings
+            var json = JsonConvert.SerializeObject(network_, Formatting.Indented, new JsonSerializerSettings
             {
-                TypeNameHandling = TypeNameHandling.Auto
+                TypeNameHandling = TypeNameHandling.All
             }); ;
             var document = new BsonDocument
             {
@@ -73,11 +70,34 @@ namespace WebAPI
             var document = collection.Find(new BsonDocument()).FirstOrDefault();
             if (document != null)
             {
-                network_ = JsonConvert.DeserializeObject<ActivationNetwork>
-                (document.GetValue("network").AsString, new JsonSerializerSettings
+                var tmp = document.GetValue("network").AsString;
+                System.Diagnostics.Debug.WriteLine(tmp);
+                try
+                {
+                    network_ = JsonConvert.DeserializeObject<ActivationNetwork>
+                    (tmp, new JsonSerializerSettings
                     {
-                        TypeNameHandling = TypeNameHandling.Auto
+                        TypeNameHandling = TypeNameHandling.All
                     });
+                    
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Error during deserialization: " + ex.Message);
+                    // Additional debug information
+                    if (network_ == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Error: deserialized network is null");
+                    }
+                    else if (network_.Layers == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Error: deserialized network Layers is null");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Network successfully deserialized");
+                    }
+                }
             }
             else network_ = null;
         }

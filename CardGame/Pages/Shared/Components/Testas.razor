@@ -53,13 +53,16 @@
 </MudPaper>
 
 <MudPaper Class="d-flex">
-<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize" Style="width: 150px;" />
-<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize1" Style="width: 150px;" />
-<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize2" Style="width: 150px;" />
-<MudNumericField Label="Outlined" Variant="Variant.Outlined" T="double?" @bind-Value="neuralSize3" Style="width: 150px;" />
+<MudNumericField Label="Sample Size" Variant="Variant.Outlined" T="int" @bind-Value="sample_s" Style="width: 150px;" />
+<MudNumericField Label="Iterations" Variant="Variant.Outlined" T="int" @bind-Value="iter" Style="width: 150px;" />
+<MudNumericField Label="Hidden Layer 1" Variant="Variant.Outlined" T="int" @bind-Value="neuralSize2" Style="width: 150px;" />
+    <MudNumericField Label="Hidden Layer 2" Variant="Variant.Outlined" T="int" @bind-Value="neuralSize3" Style="width: 150px;" />
+    <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined" Style="width: 150px;">@gsc.game_state.winning_hand</MudAlert>
+    <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined" Style="width: 150px;">@who_won() </MudAlert>
+    
 </MudPaper>
-<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.game_state.winning_hand</MudAlert>
-<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@who_won()</MudAlert>
+<br>
+<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@message </MudAlert>
 
 
 
@@ -84,10 +87,10 @@
     private string? message = "testas";
     ElementReference myRef = new ElementReference();
 
-    public double? neuralSize = 100.0;
-    public double? neuralSize1 = 100.0;
-    public double? neuralSize2 = 100.0;
-    public double? neuralSize3 = 100.0;
+    public int sample_s = 5000;
+    public int iter = 1000;
+    public int neuralSize2 = 5;
+    public int neuralSize3 = 3;
 
 
     // @onclick="() => test()"
@@ -100,7 +103,7 @@
     }
     private void RaiseClick()
     {
-        neuralSize1 = gsc.get_error();
+        message = gsc.get_error(sample_s, iter, neuralSize2, neuralSize3);
     }
     private string who_won()
     {
