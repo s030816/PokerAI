@@ -11,7 +11,18 @@ namespace WebAPI
     {
         public List<string> cards_ = new List<string>();
         public string winning_combination = "High Card";
-        private double[]? hand_vector_;
+        private double[]? hand_vector_preflop_;
+        private double[]? hand_vector_flop_;
+        private double[]? hand_vector_turn_;
+        private double[]? hand_vector_river_;
+
+        public static NeuronNetwork? pre_flop_;
+        public static NeuronNetwork? flop_train_;
+        public static NeuronNetwork? turn_train_;
+        public static NeuronNetwork? river_train_;
+
+
+
 
         private ulong flush_ =              0b000000001;
         private ulong straight_ =           0b000000010;
@@ -41,13 +52,29 @@ namespace WebAPI
             var cards = new List<string>();
             var indexes = new HashSet<int>();
             Random rnd = new Random();
-            hand_vector_= new double[52];
+
+            hand_vector_preflop_ = new double[52];
+            hand_vector_flop_ = new double[52];
+            hand_vector_turn_ = new double[52];
+            hand_vector_river_ = new double[52];
+
             for(int i = 0; i < list_size;++i)
             {
                 int tmp = -1;
                 while(indexes.Contains(tmp = rnd.Next(52)));
                 indexes.Add(tmp);
-                hand_vector_[tmp] = 1.0;
+
+                if (i > 1)
+                {
+                    // Case opponent hand
+                    if(i < 4) hand_vector_preflop_[tmp] = 1.0;
+                    // Case flop
+                    if (i < 4 + 3) hand_vector_flop_[tmp] = 1.0;
+                    // Case turn
+                    if (i < 4 + 4) hand_vector_turn_[tmp] = 1.0;
+
+                    hand_vector_river_[tmp] = 1.0;
+                }
                 cards.Add(cards_[tmp]);
             }
 
@@ -76,54 +103,75 @@ namespace WebAPI
             state.who_won = -1;
             return state;
         }
-        // TODO: remake all inputs into vector
+
+        private double[] mark_vector(List<string> deck, List<string> hand, int state)
+        {
+            var returns = new double[52];
+            returns[cards_.IndexOf(hand[0])] = 1;
+            returns[cards_.IndexOf(hand[1])] = 1;
+            if (deck != null)
+            {
+                for (var i = 0; i < state; ++i)
+                {
+                    returns[cards_.IndexOf(deck[i])] = 1;
+                }
+            }
+            return returns;
+        }
+
+        public string make_decision(GameState current)
+        {
+            var inputs = this.mark_vector(current.deck,current.opponent_hand, (int)current.state);
+            switch (current.state)
+            {
+                case 0:
+                    return pre_flop_.predict(inputs).ToString();
+                case 3:
+                    return flop_train_.predict(inputs).ToString();
+                case 4:
+                    return turn_train_.predict(inputs).ToString();
+                case 5:
+                    return river_train_.predict(inputs).ToString();
+                default:
+                    return null;
+            }
+        }
+
         public string simulate(int data_size, int iterations, int neuron_c1, int neuron_c2)
         {
-            double[][] inputs = new double[data_size][];
-            double[][] inputs_flop = new double[data_size][];
+            var inputs = new List<double[][]>();
+            for(var i = 0; i < 4; ++i) inputs.Add(new double[data_size][]);
+
             double[][] outputs = new double[data_size][];
-            Func<int, Tuple<List<Tuple<int, int>>, List<Tuple<int, int>>>, double> 
-                calc_card = 
-                (index,decs) => 
-                (decs.Item2[index].Item1 * 13 + decs.Item2[index].Item2) / 100.0
-            ;
+
             for (var i = 0; i < data_size; ++i)
             {
                 var tmp = this.new_game();
-                inputs[i] = new double[2];
-                inputs_flop[i] = new double[52];
-                Array.Copy(hand_vector_, inputs_flop[i], hand_vector_.Length);
+
+                inputs[0][i] = hand_vector_preflop_;
+                inputs[1][i] = hand_vector_flop_;
+                inputs[2][i] = hand_vector_turn_;
+                inputs[3][i] = hand_vector_river_;
+
+                //.Copy(hand_vector_, inputs_flop[i], hand_vector_.Length);
                 outputs[i] = new double[1];
 
-                var decs = this.extract_card(tmp.deck, tmp.player_hand, tmp.opponent_hand);
-                // AI hand
-                inputs[i][0] = calc_card(5,decs);
-                inputs[i][1] = calc_card(6, decs);
-                // table cards
-                /*
-                for(var j = 0; j < 5; ++j)
-                    inputs_flop[i][j] = calc_card(j, decs);
-                */
-                //Math.Round(num, 2);
-                if (inputs[i][0] > inputs[i][1])
-                {
-                    var swap = inputs[i][0];
-                    inputs[i][0] = inputs[i][1];
-                    inputs[i][1] = swap;
-                }
-                //inputs_flop[i][5] = inputs[i][0];
-                //inputs_flop[i][6] = inputs[i][1];
+  
                 outputs[i][0] = this.check_winner(tmp) == 2? 1:0;
                 //System.Diagnostics.Debug.WriteLine(String.Format("{0} {1} - {2}", inputs[i][0], inputs[i][1], outputs[i][0]));
             }
-            var pre_flop = new NeuronNetwork("preflop",2, neuron_c1, 1);
-            var flop_train = new NeuronNetwork("flop", 52, neuron_c2, 1);
+            pre_flop_ = new NeuronNetwork("preflop",52, neuron_c1, 1);
+            flop_train_ = new NeuronNetwork("flop", 52, neuron_c2, 1);
+            turn_train_ = new NeuronNetwork("turn", 52, neuron_c2, 1);
+            river_train_ = new NeuronNetwork("river", 52, neuron_c2, 1);
 
-
+            // TODO: Check  inputs
             System.Diagnostics.Debug.WriteLine("Starting................................");
-            var pre = pre_flop.train(ref inputs, ref outputs, iterations).ToString();
-            var flop = flop_train.train(ref inputs_flop, ref outputs, iterations).ToString();
-            return pre + " " + flop;
+            var pre = pre_flop_.train(inputs[0], ref outputs, iterations).ToString();
+            var flop = flop_train_.train(inputs[1], ref outputs, iterations).ToString();
+            var turn = turn_train_.train(inputs[2], ref outputs, iterations).ToString();
+            var river = river_train_.train(inputs[3], ref outputs, iterations).ToString();
+            return pre + " " + flop + " " + turn + " " + river;
 
         }
 

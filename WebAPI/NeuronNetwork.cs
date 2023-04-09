@@ -28,11 +28,11 @@ namespace WebAPI
             }
 
         }
-        public double train(ref double[][] inputs,ref double[][] outputs, int iteration)
+        public double train(double[][] inputs,ref double[][] outputs, int iteration)
         {
-
             // Create the backpropagation learning algorithm
-            BackPropagationLearning teacher = new BackPropagationLearning(network_);
+
+            var teacher = new ResilientBackpropagationLearning(network_);
 
             while (iteration-- > 0)
             {

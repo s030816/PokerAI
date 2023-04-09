@@ -76,7 +76,7 @@ namespace CardGame.Pages.Shared.Components
             return message;
         }
 
-        public void OnPutProcess()
+        public string OnPutProcess()
         {
             string request_url = "http://localhost:3000/advance/" + game_state._id;
             /*
@@ -89,6 +89,9 @@ namespace CardGame.Pages.Shared.Components
             //webRequest.Content = content;
 
             var response = HTTPClient.Send(webRequest);
+            using var reader = new StreamReader(response.Content.ReadAsStream());
+            message = reader.ReadToEnd();
+            return message;
         }
     }
 }

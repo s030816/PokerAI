@@ -63,6 +63,7 @@
 </MudPaper>
 <br>
 <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@message </MudAlert>
+<MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@message2 </MudAlert>
 
 
 
@@ -85,19 +86,20 @@
     private string? displayDeck = "display:none;";
     private GameStateController gsc = new GameStateController();
     private string? message = "testas";
+    private string? message2 = "predict";
     ElementReference myRef = new ElementReference();
 
-    public int sample_s = 5000;
+    public int sample_s = 1000;
     public int iter = 1000;
     public int neuralSize2 = 5;
-    public int neuralSize3 = 3;
+    public int neuralSize3 = 5;
 
 
     // @onclick="() => test()"
     // <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@gsc.message</MudAlert>
     private void CallClick()
     {
-        gsc.OnPutProcess();
+        message2 = gsc.OnPutProcess();
         gsc.OnGetProcessRequest();
         //this.StateHasChanged();
     }
