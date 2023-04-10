@@ -11,15 +11,9 @@ namespace WebAPI
     {
         public List<string> cards_ = new List<string>();
         public string winning_combination = "High Card";
-        private double[]? hand_vector_preflop_;
-        private double[]? hand_vector_flop_;
-        private double[]? hand_vector_turn_;
-        private double[]? hand_vector_river_;
+        private List<int>? dec_index;
 
-        public static NeuronNetwork? pre_flop_;
-        public static NeuronNetwork? flop_train_;
-        public static NeuronNetwork? turn_train_;
-        public static NeuronNetwork? river_train_;
+        public static TrainingModel? ANN;
 
 
 
@@ -53,10 +47,7 @@ namespace WebAPI
             var indexes = new HashSet<int>();
             Random rnd = new Random();
 
-            hand_vector_preflop_ = new double[52];
-            hand_vector_flop_ = new double[52];
-            hand_vector_turn_ = new double[52];
-            hand_vector_river_ = new double[52];
+            dec_index= new List<int>();
 
             for(int i = 0; i < list_size;++i)
             {
@@ -66,14 +57,8 @@ namespace WebAPI
 
                 if (i > 1)
                 {
-                    // Case opponent hand
-                    if(i < 4) hand_vector_preflop_[tmp] = 1.0;
-                    // Case flop
-                    if (i < 4 + 3) hand_vector_flop_[tmp] = 1.0;
-                    // Case turn
-                    if (i < 4 + 4) hand_vector_turn_[tmp] = 1.0;
-
-                    hand_vector_river_[tmp] = 1.0;
+                    dec_index.Add(tmp);
+                    
                 }
                 cards.Add(cards_[tmp]);
             }
@@ -125,13 +110,13 @@ namespace WebAPI
             switch (current.state)
             {
                 case 0:
-                    return pre_flop_.predict(inputs).ToString();
+                    return ANN.pre_flop_.predict(inputs).ToString();
                 case 3:
-                    return flop_train_.predict(inputs).ToString();
+                    return ANN.flop_train_.predict(inputs).ToString();
                 case 4:
-                    return turn_train_.predict(inputs).ToString();
+                    return ANN.turn_train_.predict(inputs).ToString();
                 case 5:
-                    return river_train_.predict(inputs).ToString();
+                    return ANN.river_train_.predict(inputs).ToString();
                 default:
                     return null;
             }
@@ -139,39 +124,20 @@ namespace WebAPI
 
         public string simulate(int data_size, int iterations, int neuron_c1, int neuron_c2)
         {
-            var inputs = new List<double[][]>();
-            for(var i = 0; i < 4; ++i) inputs.Add(new double[data_size][]);
-
-            double[][] outputs = new double[data_size][];
-
+            ANN = new TrainingModel(data_size,iterations,neuron_c1,neuron_c2);
             for (var i = 0; i < data_size; ++i)
             {
                 var tmp = this.new_game();
 
-                inputs[0][i] = hand_vector_preflop_;
-                inputs[1][i] = hand_vector_flop_;
-                inputs[2][i] = hand_vector_turn_;
-                inputs[3][i] = hand_vector_river_;
+                ANN.init_vectors(ref dec_index, this.check_winner(tmp) == 2 ? 1 : 0,i);
 
-                //.Copy(hand_vector_, inputs_flop[i], hand_vector_.Length);
-                outputs[i] = new double[1];
-
-  
-                outputs[i][0] = this.check_winner(tmp) == 2? 1:0;
-                //System.Diagnostics.Debug.WriteLine(String.Format("{0} {1} - {2}", inputs[i][0], inputs[i][1], outputs[i][0]));
             }
-            pre_flop_ = new NeuronNetwork("preflop",52, neuron_c1, 1);
-            flop_train_ = new NeuronNetwork("flop", 52, neuron_c2, 1);
-            turn_train_ = new NeuronNetwork("turn", 52, neuron_c2, 1);
-            river_train_ = new NeuronNetwork("river", 52, neuron_c2, 1);
-
             // TODO: Check  inputs
-            System.Diagnostics.Debug.WriteLine("Starting................................");
-            var pre = pre_flop_.train(inputs[0], ref outputs, iterations).ToString();
-            var flop = flop_train_.train(inputs[1], ref outputs, iterations).ToString();
-            var turn = turn_train_.train(inputs[2], ref outputs, iterations).ToString();
-            var river = river_train_.train(inputs[3], ref outputs, iterations).ToString();
-            return pre + " " + flop + " " + turn + " " + river;
+            var error_val = ANN.train_model();
+
+            
+
+            return error_val;
 
         }
 

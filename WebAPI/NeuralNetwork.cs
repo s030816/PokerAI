@@ -8,12 +8,12 @@ using Newtonsoft.Json.Linq;
 
 namespace WebAPI
 {
-    public class NeuronNetwork
+    public class NeuralNetwork
     {
         private ActivationNetwork? network_;
         private string? collname_;
         public double error = double.PositiveInfinity;
-        public NeuronNetwork(string gameState, int inputN, int hiddenN, int outputN)
+        public NeuralNetwork(string gameState, int inputN, int hiddenN, int outputN)
         {
             collname_= gameState;
             //mongodb_import();
