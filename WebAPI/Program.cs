@@ -50,11 +50,13 @@ app.MapGet("/initgame", async (GameStateService game_service) =>
 });
 
 app.MapGet("/train", 
-    async (GameStateService game_service, int iter, int sample_s, int ns1, int ns2) =>
+    async (GameStateService game_service, int iter, int sample_s, int ns1, int ns2,
+    int iter1, int sample_s1, int ns11, int ns12) =>
 {
     var temp = new Game();
-    var error = temp.simulate(iter, sample_s, ns1, ns2);
-    return Results.Created($"/train/errorval=", error);
+    var error1 = temp.train(iter, sample_s, ns1, ns2, ref Game.ANN);
+    var error2 = temp.train(iter1, sample_s1, ns11, ns12, ref Game.ANN2);
+    return Results.Created($"/train/errorval=", error1 + "\n" + error2);
 
 
 });

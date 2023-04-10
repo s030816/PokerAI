@@ -55,11 +55,19 @@
 <MudPaper Class="d-flex">
 <MudNumericField Label="Sample Size" Variant="Variant.Outlined" T="int" @bind-Value="sample_s" Style="width: 150px;" />
 <MudNumericField Label="Iterations" Variant="Variant.Outlined" T="int" @bind-Value="iter" Style="width: 150px;" />
-<MudNumericField Label="Hidden Layer 1" Variant="Variant.Outlined" T="int" @bind-Value="neuralSize2" Style="width: 150px;" />
-    <MudNumericField Label="Hidden Layer 2" Variant="Variant.Outlined" T="int" @bind-Value="neuralSize3" Style="width: 150px;" />
+    <MudNumericField Label="Hidden Layer 1" Variant="Variant.Outlined" T="int" @bind-Value="hidden_layer_pre" Style="width: 150px;" />
+    <MudNumericField Label="Hidden Layer 2" Variant="Variant.Outlined" T="int" @bind-Value="hidden_layer" Style="width: 150px;" />
+    
     <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined" Style="width: 150px;">@gsc.game_state.winning_hand</MudAlert>
     <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined" Style="width: 150px;">@who_won() </MudAlert>
     
+</MudPaper>
+<MudPaper Class="d-flex">
+    <MudNumericField Label="Sample Size" Variant="Variant.Outlined" T="int" @bind-Value="sample_s1" Style="width: 150px;" />
+    <MudNumericField Label="Iterations" Variant="Variant.Outlined" T="int" @bind-Value="iter1" Style="width: 150px;" />
+    <MudNumericField Label="Hidden Layer 1" Variant="Variant.Outlined" T="int" @bind-Value="hidden_layer_pre1" Style="width: 150px;" />
+    <MudNumericField Label="Hidden Layer 2" Variant="Variant.Outlined" T="int" @bind-Value="hidden_layer1" Style="width: 150px;" />
+
 </MudPaper>
 <br>
 <MudAlert Severity="Severity.Normal" Variant="Variant.Outlined">@message </MudAlert>
@@ -91,8 +99,13 @@
 
     public int sample_s = 1000;
     public int iter = 1000;
-    public int neuralSize2 = 5;
-    public int neuralSize3 = 5;
+    public int hidden_layer_pre = 5;
+    public int hidden_layer = 5;
+
+    public int sample_s1 = 5000;
+    public int iter1 = 1000;
+    public int hidden_layer_pre1 = 5;
+    public int hidden_layer1 = 5;
 
 
     // @onclick="() => test()"
@@ -105,7 +118,8 @@
     }
     private void RaiseClick()
     {
-        message = gsc.get_error(sample_s, iter, neuralSize2, neuralSize3);
+        message = gsc.get_error(iter,sample_s, hidden_layer_pre, hidden_layer,
+        iter1,sample_s1, hidden_layer_pre1, hidden_layer1);
     }
     private string who_won()
     {

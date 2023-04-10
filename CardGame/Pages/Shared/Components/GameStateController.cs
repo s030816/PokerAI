@@ -63,10 +63,12 @@ namespace CardGame.Pages.Shared.Components
             game_state = JsonSerializer.Deserialize<GameState>(message);
         }
 
-        public string get_error(int iter, int sample_s, int ns1, int ns2)
+        public string get_error(int iter, int sample_s, int ns1, int ns2, 
+            int iter1, int sample_s1, int ns11, int ns12)
         {
             string request_url = "http://localhost:3000/train";
-            var url = $"{request_url}?iter={iter}&sample_s={sample_s}&ns1={ns1}&ns2={ns2}";
+            var url = 
+          $"{request_url}?iter={iter}&sample_s={sample_s}&ns1={ns1}&ns2={ns2}&iter1={iter1}&sample_s1={sample_s1}&ns11={ns11}&ns12={ns12}";
 
             var webRequest = new HttpRequestMessage(HttpMethod.Get, url);
 

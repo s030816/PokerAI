@@ -14,7 +14,7 @@ namespace WebAPI
         private List<int>? dec_index;
 
         public static TrainingModel? ANN;
-
+        public static TrainingModel? ANN2;
 
 
 
@@ -104,12 +104,18 @@ namespace WebAPI
             return returns;
         }
 
-        public string make_decision(GameState current)
+        public string make_decision(GameState current, ref TrainingModel ann)
         {
             var inputs = this.mark_vector(current.deck,current.opponent_hand, (int)current.state);
+            double probability = 0;
             switch (current.state)
             {
-                case 0:
+                case 0: // pre-flop
+                    probability = ann.pre_flop_.predict(inputs);
+                    if(probability < 0.2)
+                    {
+                        if (current.player_bet > 20) ;
+                    }
                     return ANN.pre_flop_.predict(inputs).ToString();
                 case 3:
                     return ANN.flop_train_.predict(inputs).ToString();
@@ -122,18 +128,18 @@ namespace WebAPI
             }
         }
 
-        public string simulate(int data_size, int iterations, int neuron_c1, int neuron_c2)
+        public string train(int data_size, int iterations, int neuron_c1, int neuron_c2, ref TrainingModel ann)
         {
-            ANN = new TrainingModel(data_size,iterations,neuron_c1,neuron_c2);
+            ann = new TrainingModel(data_size,iterations,neuron_c1,neuron_c2);
             for (var i = 0; i < data_size; ++i)
             {
                 var tmp = this.new_game();
 
-                ANN.init_vectors(ref dec_index, this.check_winner(tmp) == 2 ? 1 : 0,i);
+                ann.init_vectors(ref dec_index, this.check_winner(tmp) == 2 ? 1 : 0,i);
 
             }
             // TODO: Check  inputs
-            var error_val = ANN.train_model();
+            var error_val = ann.train_model();
 
             
 
