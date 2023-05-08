@@ -69,7 +69,7 @@ app.MapPut("/advance/{id}", async (GameStateService game_service, string id) =>
     if (game_state is null)
         return Results.NotFound();
     var temp = new Game();
-    var ret = temp.make_decision(game_state);
+    var ret = temp.make_decision(game_state, ref Game.ANN);
 
     await game_service.Update(id, temp.advance_ingame(game_state));
 

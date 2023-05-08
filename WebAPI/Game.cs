@@ -111,11 +111,8 @@ namespace WebAPI
             switch (current.state)
             {
                 case 0: // pre-flop
-                    probability = ann.pre_flop_.predict(inputs);
-                    if(probability < 0.2)
-                    {
-                        if (current.player_bet > 20) ;
-                    }
+                    //probability = ann.pre_flop_.predict(inputs);
+
                     return ANN.pre_flop_.predict(inputs).ToString();
                 case 3:
                     return ANN.flop_train_.predict(inputs).ToString();
