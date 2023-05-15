@@ -1,4 +1,5 @@
-﻿using Amazon.Auth.AccessControlPolicy;
+﻿using Accord.MachineLearning;
+using Amazon.Auth.AccessControlPolicy;
 using Microsoft.AspNetCore.Mvc.Razor.Infrastructure;
 using System;
 using System.Diagnostics;
@@ -104,6 +105,68 @@ namespace WebAPI
             return returns;
         }
 
+        /*
+         * train on simulation
+         var qlearning = new QLearning(
+    states: 10,
+    actions: 3,
+    learningRate: 0.5,
+    discountFactor: 0.9, // 0 - accute, 1 - long term goal
+    randomization: 0.1);
+
+double probabilityOfSunlight = 0.8;
+double reward = 0;
+
+for (int i = 0; i < 100; i++)
+{
+    int currentState = (int)(probabilityOfSunlight * 10);
+    Console.WriteLine(currentState);
+    // Choose an action based on the current state and the Q-Values
+    int action = qlearning.GetAction(currentState);
+
+    // Perform the chosen action and observe the reward
+    if (action == 0)
+    {
+        Console.WriteLine("The duck quacks!");
+        reward = GetReward(probabilityOfSunlight, 0);
+    }
+    else if (action == 1)
+    {
+        Console.WriteLine("The duck walks!");
+        reward = GetReward(probabilityOfSunlight, 1);
+    }
+    else if (action == 2)
+    {
+        Console.WriteLine("The duck sleeps!");
+        reward = GetReward(probabilityOfSunlight, 2);
+    }
+
+    // Set the new state for the next episode
+    probabilityOfSunlight = new Random().NextDouble();
+    // Update the Q-Values based on the observed reward and the new state
+    int nextState = (int)(probabilityOfSunlight * 10);
+    qlearning.UpdateQValue(currentState, action, nextState, reward);
+
+    
+}
+
+static bool IsSunShining(double probability)
+{
+    return new Random().NextDouble() < probability;
+}
+
+static double GetReward(double currentState, int action)
+{
+    bool sunshine = IsSunShining(currentState);
+    if (sunshine && action == 1) return 10;
+    else if(sunshine) return -10;
+
+    if(action == 1) return 0;
+    return 10;
+
+}
+         */
+
         public string make_decision(GameState current, ref TrainingModel ann)
         {
             var inputs = this.mark_vector(current.deck,current.opponent_hand, (int)current.state);
@@ -138,7 +201,8 @@ namespace WebAPI
             // TODO: Check  inputs
             var error_val = ann.train_model();
 
-            
+
+
 
             return error_val;
 
