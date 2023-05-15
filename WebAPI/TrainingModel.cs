@@ -1,4 +1,6 @@
-﻿namespace WebAPI
+﻿using Accord.MachineLearning;
+
+namespace WebAPI
 {
     public class TrainingModel
     {
@@ -6,11 +8,16 @@
         public double[]? hand_vector_flop_;
         public double[]? hand_vector_turn_;
         public double[]? hand_vector_river_;
-
+        /*
         public NeuralNetwork? pre_flop_;
         public NeuralNetwork? flop_train_;
         public NeuralNetwork? turn_train_;
         public NeuralNetwork? river_train_;
+        */
+        public List<NeuralNetwork>? nn_list_;
+
+        public List<Qlearner>? ql_list_;
+
 
         public List<double[][]> inputs = new List<double[][]>();
         public double[][]? outputs;
@@ -63,17 +70,30 @@
 
         public string train_model()
         {
-            pre_flop_ = new NeuralNetwork("preflop", 52, neuron_c1, 1);
-            flop_train_ = new NeuralNetwork("flop", 52, neuron_c2, 1);
-            turn_train_ = new NeuralNetwork("turn", 52, neuron_c2, 1);
-            river_train_ = new NeuralNetwork("river", 52, neuron_c2, 1);
+            ql_list_ = new List<Qlearner>();
+            for (var i = 0; i < 4; ++i)
+            {
+                ql_list_.Add(new Qlearner(
+    states: 10,
+    actions: 3,
+    learningRate: 0.5,
+    discountFactor: 0.7, // 0 - accute, 1 - long term goal
+    randomization: 0.5));
+            }
+            nn_list_ = new List<NeuralNetwork>
+            {
+                new NeuralNetwork("preflop", 52, neuron_c1, 1),
+                new NeuralNetwork("flop", 52, neuron_c2, 1),
+                new NeuralNetwork("turn", 52, neuron_c2, 1),
+                new NeuralNetwork("river", 52, neuron_c2, 1)
+            };
 
             // TODO: Check  inputs
             //System.Diagnostics.Debug.WriteLine("Starting................................");
-            var pre = pre_flop_.train(inputs[0], ref outputs, iterations).ToString();
-            var flop = flop_train_.train(inputs[1], ref outputs, iterations).ToString();
-            var turn = turn_train_.train(inputs[2], ref outputs, iterations).ToString();
-            var river = river_train_.train(inputs[3], ref outputs, iterations).ToString();
+            var pre = nn_list_[0].train(inputs[0], ref outputs, iterations).ToString();
+            var flop = nn_list_[1].train(inputs[1], ref outputs, iterations).ToString();
+            var turn = nn_list_[2].train(inputs[2], ref outputs, iterations).ToString();
+            var river = nn_list_[3].train(inputs[3], ref outputs, iterations).ToString();
             return pre + " " + flop + " " + turn + " " + river;
         }
     }

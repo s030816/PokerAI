@@ -107,12 +107,7 @@ namespace WebAPI
 
         /*
          * train on simulation
-         var qlearning = new QLearning(
-    states: 10,
-    actions: 3,
-    learningRate: 0.5,
-    discountFactor: 0.9, // 0 - accute, 1 - long term goal
-    randomization: 0.1);
+         
 
 double probabilityOfSunlight = 0.8;
 double reward = 0;
@@ -170,23 +165,32 @@ static double GetReward(double currentState, int action)
         public string make_decision(GameState current, ref TrainingModel ann)
         {
             var inputs = this.mark_vector(current.deck,current.opponent_hand, (int)current.state);
-            double probability = 0;
+            int state = -1;
             switch (current.state)
             {
                 case 0: // pre-flop
-                    //probability = ann.pre_flop_.predict(inputs);
-
-                    return ANN.pre_flop_.predict(inputs).ToString();
+                    state = 0;
+                    break;
                 case 3:
-                    return ANN.flop_train_.predict(inputs).ToString();
+                    state = 1;
+                    break;
                 case 4:
-                    return ANN.turn_train_.predict(inputs).ToString();
+                    state = 2;
+                    break;
                 case 5:
-                    return ANN.river_train_.predict(inputs).ToString();
+                    state = 3;
+                    break;
                 default:
                     return null;
             }
+            var probability = (int)(ann.nn_list_[state].predict(inputs) * 10);
+            if (probability > 9)
+                return "Error";
+            var action = ann.ql_list_[state].GetAction(probability);
+            return action.ToString();
         }
+
+
 
         public string train(int data_size, int iterations, int neuron_c1, int neuron_c2, ref TrainingModel ann)
         {
